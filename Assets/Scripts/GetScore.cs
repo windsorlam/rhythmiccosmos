@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
-<<<<<<< HEAD
 using System.Collections.Generic;
 using System.Threading.Tasks;
-=======
->>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 using Parse;
 
 public class GetScore : MonoBehaviour {
-
-<<<<<<< HEAD
+	
 	public  UILabel [] scoreUI;  
 
 	int score;
@@ -68,36 +64,5 @@ public class GetScore : MonoBehaviour {
 	}
 
 
-=======
-	public UILabel scoreUI;         
 
-	public string score = "test";
-
-	// Use this for initialization
-	void Start () {
-		//ParseObject gameScore;
-
-
-
-
-		ParseQuery<ParseObject> query = ParseObject.GetQuery("Score");
-		query.GetAsync("o3SshLrPsB").ContinueWith(t => { 
-			ParseObject gameScore = t.Result;	
-			score = gameScore.Get<string>("objectID");
-			Debug.Log(score);
-			score = "hello";
-			Debug.Log(score);
-		});
-
-		//score = "world";
-		scoreUI.text = score;
-		
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
->>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 }

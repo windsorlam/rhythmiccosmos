@@ -23,7 +23,11 @@ public class Spwaner :  MonoBehaviour
         if (timer > interval)
         {
             timer = 0;
+<<<<<<< HEAD
+			current = logic.nextHighlight;
+=======
 			current = logic.currentTrack;
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
             GameObject g = Instantiate(elementPrefab) as GameObject;    //克隆一个光晕
             g.transform.position = t.position;          //光晕的位置与欧拉角和t一致

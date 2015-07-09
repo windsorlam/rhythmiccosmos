@@ -17,7 +17,7 @@ public class UIEvents : MonoBehaviour {
 
     public void OnStartClick()
     {
-        Application.LoadLevel("Space");
+        Application.LoadLevel("MusicChooser");
     }
 
     public void OnQuitClick()
@@ -35,7 +35,9 @@ public class UIEvents : MonoBehaviour {
 		Application.LoadLevel("HighScore");
 	}
 
-
-
+	public void OnPlayClick()
+	{
+		Application.LoadLevel ("Space");
+	}
 
 }

@@ -7,6 +7,51 @@ using DG.Tweening;                  //Dotween插件
 using Parse;
 
 public class MainLogic : MonoBehaviour {
+<<<<<<< HEAD
+    public GameObject elementPrefab;    //一个隧道预设
+
+	public GameObject elementPrefab0;
+	public GameObject elementPrefab1;
+	public GameObject elementPrefab2;
+	public GameObject elementPrefab3;
+	public GameObject elementPrefab4;
+	public GameObject elementPrefab5;
+	public GameObject elementPrefab6; 
+	public GameObject elementPrefab7;
+	public GameObject elementPrefab8;
+	public GameObject elementPrefab9;
+
+
+    public Material polygonMat;         //10边形的材质
+    public Material highlightMat;       //轨道高亮的材质
+    public Material[] originalMat;        //轨道原本的材质
+
+    public int nextHighlight = 0;           //高亮的轨道索引, next time
+
+	int currentHighlight = 0;        //高亮的轨道索引, current
+
+	Queue highlight = new Queue();   //Highlight to change
+
+    int nextDir = 1;              //下次高亮轨道的方向：-1 right ，1 left
+
+    public int currentTrack = 0;        //当前飞机所在轨道
+
+    float interval;                     //每间隔多少秒克隆一个隧道
+
+	float highlightChangeInterval;      //间隔多少秒, currentHighLight change to nextHighLight
+
+    float timer = 0;                    //克隆隧道计时器
+
+    float dirTimer = 0;                 //改变隧道扭曲方向的计时器
+
+	float highlightTimer = 0;
+
+	float scoreHighlightTimer = 0;
+
+    public float dirInterval = 5;       //每隔5秒改变一次隧道方向
+
+	public float highlightInterval = 4; //Change highlight tracks
+=======
     public GameObject elementPrefab;    //一个隧道预设
     public Material polygonMat;         //10边形的材质
     public Material highlightMat;       //轨道高亮的材质
@@ -24,6 +69,7 @@ public class MainLogic : MonoBehaviour {
     float dirTimer = 0;                 //改变隧道扭曲方向的计时器
 
     public float dirInterval = 5;       //每隔5秒改变一次隧道方向
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
     public float currentSpeed = 60;     //当前隧道移动速度
 
@@ -43,6 +89,15 @@ public class MainLogic : MonoBehaviour {
 
     public GameObject comboUI;          //连击UI
 
+<<<<<<< HEAD
+    public UISlider hpUI;               //HP进度条
+
+	public UILabel testUI;
+
+    public UISlider energyUI;           //Energy进度条
+
+    public UILabel scoreUI;             //分数UI
+=======
     public UISlider hpUI;               //HP进度条
 
     public UISlider energyUI;           //Energy进度条
@@ -50,18 +105,31 @@ public class MainLogic : MonoBehaviour {
     public UILabel scoreUI;             //分数UI
 
 	public UILabel testUI;
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
     public Spwaner spawaner;            //光晕生成器
 
     float score;                          //分数
 
+<<<<<<< HEAD
     int combo;                          //连击
+
+//	bool sharpFlag = true;         
+=======
+    int combo;                          //连击
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
     public Transform tracers;       //面板物体"Tracers"
 
     bool boosting = false;      //是否狂热
 
+<<<<<<< HEAD
     public GameObject failUI;
+
+	public GameObject feverUI;
+=======
+    public GameObject failUI;
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
     public GameObject easyTouchControlsCanvas;
 
@@ -70,7 +138,13 @@ public class MainLogic : MonoBehaviour {
     public UISlider warnTimerBar; //提示时间条
 	// Use this for initialization
 	void Start () {
+<<<<<<< HEAD
         interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
+
+		highlightChangeInterval = 150 / currentSpeed; 
+=======
+        interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
         player = GameObject.FindGameObjectWithTag("Player");    //找到玩家飞船的GameObject
 
@@ -82,6 +156,19 @@ public class MainLogic : MonoBehaviour {
         nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 
         //提示轨道偏移
+<<<<<<< HEAD
+//        if (nextDir == -1)
+//        {
+//            DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//            DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//            
+//        }
+//        else
+//        {
+//            DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//            DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//        }
+=======
         if (nextDir == -1)
         {
             DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
@@ -93,6 +180,7 @@ public class MainLogic : MonoBehaviour {
             DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
             DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
         }
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
        
 	}
 
@@ -108,7 +196,13 @@ public class MainLogic : MonoBehaviour {
     }
 
 	// Update is called once per frame
+<<<<<<< HEAD
 	void Update () {
+		testUI.text = nextDir.ToString ();
+
+=======
+	void Update () {
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
         if (hpUI.value <= 0)
         {
             failUI.SetActive(true);
@@ -120,6 +214,10 @@ public class MainLogic : MonoBehaviour {
             scoreUI.gameObject.SetActive(false);
             energyUI.gameObject.SetActive(false);
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;
 			testObject.SaveAsync();
@@ -131,11 +229,60 @@ public class MainLogic : MonoBehaviour {
 
 		// gravity 
 		player.transform.RotateAround(pivot.transform.position, Vector3.forward, Time.deltaTime * playerSpeed * Input.acceleration.x * 8);
+<<<<<<< HEAD
+=======
 		testUI.text = Input.acceleration.x.ToString();
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 		GetCurrentTrack();
 
         timer += Time.deltaTime;        //克隆隧道计时器 + 距上次Update函数到此次Update函数所流逝的时间
         dirTimer += Time.deltaTime;     //改变隧道扭曲方向的计时器 + 同时
+<<<<<<< HEAD
+		highlightTimer += Time.deltaTime; 
+		scoreHighlightTimer += Time.deltaTime;
+
+			switch (nextHighlight) {  //clone tunnel, elementProfab# as input
+			case 0:
+				CloneTunnel (elementPrefab0);
+				break;
+			case 1:
+				CloneTunnel (elementPrefab1);
+				break;
+			case 2:
+				CloneTunnel (elementPrefab2);
+				break;
+			case 3:
+				CloneTunnel (elementPrefab3);
+				break;
+			case 4:
+				CloneTunnel (elementPrefab4);
+				break;
+			case 5:
+				CloneTunnel (elementPrefab5);
+				break;
+			case 6:
+				CloneTunnel (elementPrefab6);
+				break;
+			case 7:
+				CloneTunnel (elementPrefab7);
+				break;
+			case 8:
+				CloneTunnel (elementPrefab8);
+				break;
+			case 9:
+				CloneTunnel (elementPrefab9);
+				break;
+			default:
+				print ("Incorrect elementPrefab input.");
+				break;
+			}
+
+
+        //检查能量条是否满足狂热
+        if (energyUI.value == 1 && !boosting)
+        {
+			feverUI.SetActive(true);
+=======
 
         if (timer > interval)   //当克隆隧道计时器大于克隆隧道的间隔时间，则克隆一个隧道
         {
@@ -158,6 +305,7 @@ public class MainLogic : MonoBehaviour {
         //检查能量条是否满足狂热
         if (energyUI.value == 1 && !boosting)
         {
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
             boosting = true;
             DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
             DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
@@ -167,11 +315,72 @@ public class MainLogic : MonoBehaviour {
             spawaner.interval /= 2;
             playerSpeed *= 2f;
         }
+<<<<<<< HEAD
+	}
+
+	void LateUpdate()
+	{
+		UpdateHighlight ();
+	}
+
+
+	void CloneTunnel (GameObject element)
+	{
+
+		if (timer > interval)   //当克隆隧道计时器大于克隆隧道的间隔时间，则克隆一个隧道
+		{
+			current = Instantiate(element) as GameObject; //克隆体保存在current此变量里
+			current.transform.position = new Vector3(53, -8.1f, 275);//将新隧道放在 （53，-8.1f,275)这个位置
+			current.GetComponent<ElementMovement>().speed = currentSpeed;
+			timer = 0;      //计时器复位
+		}
+		
+		if (dirTimer > dirInterval) //同上，改变扭曲方向
+		{
+			dirTimer = 0;
+			ChangeDir(dirInterval-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+		}
+
+		if (highlightTimer > highlightInterval) // Change highlight
+		{
+			highlightTimer = 0;
+			System.Random rd = new System.Random();
+			nextDir = rd.Next(0,5)-2;
+			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
+			//Debug.Log (nextDir);
+			
+			nextHighlight = (nextHighlight - nextDir);
+			if (nextHighlight > 9) nextHighlight = 0;
+			else if (nextHighlight < 0) nextHighlight = 9;
+
+			highlight.Enqueue(nextHighlight);
+			scoreHighlightTimer = 0; 
+			//ChangeHighlight(nextHighlight-nextDir);   //同时改变轨道的高亮
+		}
+
+		if (scoreHighlightTimer > highlightChangeInterval)
+		{
+			scoreHighlightTimer = -10000f;
+			currentHighlight = (int)highlight.Dequeue();
+
+		
+		}
+
+
+	}
+
+
+    //终止狂热
+    void EndBoosting()
+    {
+		feverUI.SetActive (false);
+=======
 	}
 
     //终止狂热
     void EndBoosting()
     {
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
         boosting = false;
         currentSpeed /= 3;
         dirInterval *= 2;
@@ -190,19 +399,44 @@ public class MainLogic : MonoBehaviour {
 
     //检查是否在高亮轨道
     void CheckTrack()
+<<<<<<< HEAD
+    {   
+		if(  (currentHighlight + 1)%10 == currentTrack || (currentHighlight - 1) == currentTrack  
+		       || currentHighlight  == currentTrack ||(currentHighlight==0 && currentTrack==9)) // -1 mod 10 != 9   ????
+=======
     {
         if(currentHighlight==currentTrack || (currentHighlight+1)%10==currentTrack)
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
         {
             hpUI.value += (1 + Time.deltaTime *combo * 0.1f) * Time.deltaTime * 0.2f;  //增加HP
             score += Time.deltaTime * (10 + combo / 10);
             scoreUI.text = ((int)score).ToString();     //加分
+<<<<<<< HEAD
+		} 
+=======
         }
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
         else if(!boosting)
         {
             hpUI.value -= Time.deltaTime * Time.deltaTime * 10f;  //HP减少
         }
     }
 
+<<<<<<< HEAD
+
+
+	void UpdateHighlight()
+	{
+		if (current)
+		{
+			current.GetComponent<MeshRenderer>().material = polygonMat; //current的材质必须在LateUpdate里更新，此乃Porbuilder插件的BUG
+			
+			//current.transform.FindChild(nextHighlight.ToString()).GetComponent<MeshRenderer>().material = highlightMat;  //新隧道要找到nextHighlight索引的轨道，使之高亮
+			
+			//current.transform.FindChild( ((nextHighlight+1)%10).ToString()).GetComponent<MeshRenderer>().material = highlightMat;
+		}
+	}
+=======
     void LateUpdate()
     {
         if (current)
@@ -214,6 +448,7 @@ public class MainLogic : MonoBehaviour {
             current.transform.FindChild( ((currentHighlight+1)%10).ToString()).GetComponent<MeshRenderer>().material = highlightMat;
         }
     }
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
 
     public void OnJoyStickMove(Vector2 stickPos)
     {
@@ -240,6 +475,23 @@ public class MainLogic : MonoBehaviour {
         foreach (GameObject e in elements)
         {
             //把当前的高亮轨道复原
+<<<<<<< HEAD
+            e.transform.FindChild(nextHighlight.ToString()).GetComponent<MeshRenderer>().material = originalMat[0];
+            e.transform.FindChild( ((nextHighlight+1)%10).ToString()).GetComponent<MeshRenderer>().material = originalMat[1];
+        }
+
+        //高亮轨道的索引变成idx
+        nextHighlight = idx;
+
+        foreach (GameObject e in elements)
+        {
+            //保存nextHighlight对应的轨道的材质
+            originalMat[0] = e.transform.FindChild(nextHighlight.ToString()).GetComponent<MeshRenderer>().material;
+            originalMat[1] = e.transform.FindChild(((nextHighlight + 1) % 10).ToString()).GetComponent<MeshRenderer>().material;
+            //高亮nextHighlight对应的隧道
+            e.transform.FindChild(nextHighlight.ToString()).GetComponent<MeshRenderer>().material = highlightMat;
+            e.transform.FindChild(((nextHighlight + 1) % 10).ToString()).GetComponent<MeshRenderer>().material = highlightMat;
+=======
             e.transform.FindChild(currentHighlight.ToString()).GetComponent<MeshRenderer>().material = originalMat[0];
             e.transform.FindChild( ((currentHighlight+1)%10).ToString()).GetComponent<MeshRenderer>().material = originalMat[1];
         }
@@ -255,6 +507,7 @@ public class MainLogic : MonoBehaviour {
             //高亮currentHighlight对应的隧道
             e.transform.FindChild(currentHighlight.ToString()).GetComponent<MeshRenderer>().material = highlightMat;
             e.transform.FindChild(((currentHighlight + 1) % 10).ToString()).GetComponent<MeshRenderer>().material = highlightMat;
+>>>>>>> df5dec6ed3d0dfb1a34ebda42300fcb2c69e17fb
         }
 
         //随机偏移方向

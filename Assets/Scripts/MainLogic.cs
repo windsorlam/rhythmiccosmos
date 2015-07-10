@@ -2,12 +2,12 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using VacuumShaders.CurvedWorld;    //shader插件，用来扭曲隧道
 using DG.Tweening;                  //Dotween插件
 using Parse;
 
 public class MainLogic : MonoBehaviour {
-	public GameObject elementPrefab;    //一个隧道预设
 	
 	public GameObject elementPrefab0;
 	public GameObject elementPrefab1;
@@ -50,6 +50,8 @@ public class MainLogic : MonoBehaviour {
 	public float dirInterval = 5;       //每隔5秒改变一次隧道方向
 	
 	public float highlightInterval = 4; //Change highlight tracks
+
+	public Queue<float> highlightIntervalQueue = new Queue<float>(); 
 	
 	public float currentSpeed = 60;     //当前隧道移动速度
 	
@@ -112,7 +114,19 @@ public class MainLogic : MonoBehaviour {
 		
 		//随机偏移方向
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
-		
+
+		//test for change highlight
+
+		highlightIntervalQueue.Enqueue (2.7f);
+		highlightIntervalQueue.Enqueue (4.7f);
+		highlightIntervalQueue.Enqueue (3.0f);
+		highlightIntervalQueue.Enqueue (4.4f);
+		highlightIntervalQueue.Enqueue (2.6f);
+		highlightIntervalQueue.Enqueue (3.8f);
+		highlightIntervalQueue.Enqueue (2.7f);
+
+
+
 		//提示轨道偏移
 		//        if (nextDir == -1)
 		//        {
@@ -142,8 +156,9 @@ public class MainLogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		testUI.text = nextDir.ToString ();
-		
-		if (hpUI.value <= 0)
+
+		Debug.Log (highlightIntervalQueue.Peek ());
+		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
 		{
 			failUI.SetActive(true);
 			Camera.main.transform.parent = null;
@@ -248,8 +263,9 @@ public class MainLogic : MonoBehaviour {
 			ChangeDir(dirInterval-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
-		if (highlightTimer > highlightInterval) // Change highlight
+		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
 		{
+			highlightIntervalQueue.Dequeue();
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
 			nextDir = rd.Next(0,5)-2;

@@ -124,8 +124,20 @@ public class MainLogic : MonoBehaviour {
 		highlightIntervalQueue.Enqueue (2.6f);
 		highlightIntervalQueue.Enqueue (3.8f);
 		highlightIntervalQueue.Enqueue (2.7f);
-
-
+		highlightIntervalQueue.Enqueue (2.7f);
+		highlightIntervalQueue.Enqueue (4.7f);
+		highlightIntervalQueue.Enqueue (3.0f);
+		highlightIntervalQueue.Enqueue (4.4f);
+		highlightIntervalQueue.Enqueue (2.6f);
+		highlightIntervalQueue.Enqueue (3.8f);
+		highlightIntervalQueue.Enqueue (2.7f);
+		highlightIntervalQueue.Enqueue (2.7f);
+		highlightIntervalQueue.Enqueue (4.7f);
+		highlightIntervalQueue.Enqueue (3.0f);
+		highlightIntervalQueue.Enqueue (4.4f);
+		highlightIntervalQueue.Enqueue (2.6f);
+		highlightIntervalQueue.Enqueue (3.8f);
+		highlightIntervalQueue.Enqueue (2.7f);
 
 		//提示轨道偏移
 		//        if (nextDir == -1)
@@ -158,25 +170,9 @@ public class MainLogic : MonoBehaviour {
 		testUI.text = nextDir.ToString ();
 
 		Debug.Log (highlightIntervalQueue.Peek ());
-		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
-		{
-			failUI.SetActive(true);
-			Camera.main.transform.parent = null;
-			player.SetActive(false);
-			easyTouchControlsCanvas.SetActive(false);
-			spawaner.gameObject.SetActive(false);
-			hpUI.gameObject.SetActive(false);
-			scoreUI.gameObject.SetActive(false);
-			energyUI.gameObject.SetActive(false);
-			
-			
-			ParseObject testObject = new ParseObject("Score");
-			testObject["score"] = score;
-			testObject.SaveAsync();
-			
-			return;
-		}
-		
+
+		CheckHp ();
+
 		CheckTrack();
 		
 		// gravity 
@@ -224,7 +220,40 @@ public class MainLogic : MonoBehaviour {
 			break;
 		}
 		
-		
+		CheckFever ();
+
+	}
+	
+	void LateUpdate()
+	{
+		UpdateHighlight ();
+	}
+	
+
+	void CheckHp ()
+	{
+		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
+		{
+			failUI.SetActive(true);
+			Camera.main.transform.parent = null;
+			player.SetActive(false);
+			easyTouchControlsCanvas.SetActive(false);
+			spawaner.gameObject.SetActive(false);
+			hpUI.gameObject.SetActive(false);
+			scoreUI.gameObject.SetActive(false);
+			energyUI.gameObject.SetActive(false);
+			
+			
+			ParseObject testObject = new ParseObject("Score");
+			testObject["score"] = score;
+			testObject.SaveAsync();
+			
+			return;
+		}
+	}
+
+	void CheckFever()
+	{
 		//检查能量条是否满足狂热
 		if (energyUI.value == 1 && !boosting)
 		{
@@ -233,19 +262,26 @@ public class MainLogic : MonoBehaviour {
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
 			currentSpeed *= 3;
+			GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
+			foreach (GameObject e in elements1)
+			{
+				e.GetComponent<ElementMovement>().speed = currentSpeed;
+			}
+			GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
+			foreach (GameObject e in elements2)
+			{
+				e.GetComponent<ElementMovement>().speed = -currentSpeed;
+			}
+			
 			interval = currentOffset / currentSpeed;
 			dirInterval /= 2;
 			spawaner.interval /= 2;
 			playerSpeed *= 2f;
 		}
 	}
-	
-	void LateUpdate()
-	{
-		UpdateHighlight ();
-	}
-	
-	
+
+
+
 	void CloneTunnel (GameObject element)
 	{
 		
@@ -303,13 +339,19 @@ public class MainLogic : MonoBehaviour {
 		spawaner.interval *= 2;
 		playerSpeed /= 2f;
 		interval = currentOffset / currentSpeed;
+
 		GameObject[] elements = GameObject.FindGameObjectsWithTag("Element");
-		
 		foreach (GameObject e in elements)
 		{
 			e.GetComponent<ElementMovement>().speed = currentSpeed;
 		}
-		
+
+		GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
+		foreach (GameObject e in elements2)
+		{
+			e.GetComponent<ElementMovement>().speed = -currentSpeed;
+		}
+
 		hpUI.value += 0.2f;
 	} 
 	

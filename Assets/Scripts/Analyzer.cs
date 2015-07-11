@@ -9,7 +9,7 @@
 // ------------------------------------------------------------------------------
 using System;
 using System.IO;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 
@@ -30,8 +30,8 @@ public class Analyzer
 	
 	public void Do(string musicPath)
 	{
-		Process.Start ("./streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
-		Process.Start ("./streaming_extractor", "'"+musicPath+"' rhythm.yaml");
+		Process.Start ("./Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
+		Process.Start ("./Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
 		while (true) {
 			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
 			Process[] prhythm=Process.GetProcessesByName("streaming_predo");
@@ -46,8 +46,8 @@ public class Analyzer
 			FileStream fs = new FileStream ("melody.yaml", FileMode.Open);
 			StreamReader sr = new StreamReader (fs);
 			string line;
-			ArrayList melodyList = new ArrayList ();
-			melodyList.Add (new double[]{0.0,0.0});
+			Queue<float> melodyList = new Queue<float>();
+			melodyList.Enqueue (0f);
 			//Console.WriteLine(list[0]);
 			while ((line=sr.ReadLine())!=null) {
 				//Console.WriteLine("line");
@@ -55,6 +55,7 @@ public class Analyzer
 					//Console.WriteLine("pitch");
 					string[] tokens = line.Trim ("pitch: []".ToCharArray ()).Split (',');
 					double frequency = 0.0;
+					double lasttime=0.0;
 					for (int i=0; i<tokens.Length; i++) {
 						double parsed=double.Parse(tokens[i]);
 						//Console.WriteLine(parsed);
@@ -64,8 +65,9 @@ public class Analyzer
 						}
 						frequency = f;
 						double time = Analyzer.LENGTH * i;
-						Console.WriteLine(time+":"+frequency);
-						melodyList.Add (new double[]{time,frequency});
+						//Console.WriteLine(time+":"+frequency);
+						melodyList.Enqueue ((float)(time-lasttime));
+						lasttime=time;
 					}
 					break;
 				}
@@ -76,18 +78,24 @@ public class Analyzer
 			 */
 			fs=new FileStream("rhythm.yaml",FileMode.Open);
 			sr=new StreamReader(fs);
-			ArrayList beatList=new ArrayList();
-			ArrayList onsetList=new ArrayList();
+			Queue<float> beatList=new Queue<float>();
+			Queue<float> onsetList=new Queue<float>();
 			while ((line=sr.ReadLine())!=null){
 				if(line.Contains("beats_position")){
 					string[] tokens=line.Trim("beats_position: []".ToCharArray()).Split(',');
+					double lasttime=0.0;
 					for(int i=0;i<tokens.Length;i++){
-						beatList.Add(double.Parse(tokens[i]));
+						double time=double.Parse(tokens[i]);
+						beatList.Enqueue((float)(time-lasttime));
+						lasttime=time;
 					}
 				}else if(line.Contains("onset_times")){
 					string[] tokens=line.Trim("onset_times: []".ToCharArray()).Split(',');
+					double lasttime=0.0;
 					for(int i=0;i<tokens.Length;i++){
-						onsetList.Add(double.Parse(tokens[i]));
+						double time=double.Parse(tokens[i]);
+						onsetList.Enqueue((float)(time-lasttime));
+						lasttime=time;
 					}
 					break;
 				}

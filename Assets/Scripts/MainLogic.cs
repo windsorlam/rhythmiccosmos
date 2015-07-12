@@ -53,7 +53,7 @@ public class MainLogic : MonoBehaviour {
 
 	public Queue<float> highlightIntervalQueue = new Queue<float>(); 
 	
-	public float currentSpeed = 60;     //当前隧道移动速度
+	public float currentSpeed = 80;     //当前隧道移动速度
 	
 	public float currentOffset = 25;    //当前隧道的间隔
 	
@@ -73,12 +73,12 @@ public class MainLogic : MonoBehaviour {
 	
 	public UISlider hpUI;               //HP进度条
 	
-	public UILabel testUI;
+	public UILabel finalScoreUI;        
 	
 	public UISlider energyUI;           //Energy进度条
 	
 	public UILabel scoreUI;             //分数UI
-	
+
 	public Spwaner spawaner;            //光晕生成器
 	
 	float score;                          //分数
@@ -167,14 +167,11 @@ public class MainLogic : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		testUI.text = nextDir.ToString ();
-
-		Debug.Log (highlightIntervalQueue.Peek ());
 
 		CheckHp ();
 
 		CheckTrack();
-		
+
 		// gravity 
 		player.transform.RotateAround(pivot.transform.position, Vector3.forward, Time.deltaTime * playerSpeed * Input.acceleration.x * 8);
 		GetCurrentTrack();
@@ -183,7 +180,22 @@ public class MainLogic : MonoBehaviour {
 		dirTimer += Time.deltaTime;     //改变隧道扭曲方向的计时器 + 同时
 		highlightTimer += Time.deltaTime; 
 		scoreHighlightTimer += Time.deltaTime;
-		
+
+
+		GenerateEnviroment ();
+
+		CheckFever ();
+
+	}
+	
+	void LateUpdate()
+	{
+		UpdateHighlight ();
+	}
+	
+
+	void GenerateEnviroment ()
+	{
 		switch (nextHighlight) {  //clone tunnel, elementProfab# as input
 		case 0:
 			CloneTunnel (elementPrefab0);
@@ -219,22 +231,16 @@ public class MainLogic : MonoBehaviour {
 			print ("Incorrect elementPrefab input.");
 			break;
 		}
-		
-		CheckFever ();
 
 	}
-	
-	void LateUpdate()
-	{
-		UpdateHighlight ();
-	}
-	
+
 
 	void CheckHp ()
 	{
 		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
 		{
 			failUI.SetActive(true);
+			finalScoreUI.text = ((int)score).ToString();
 			Camera.main.transform.parent = null;
 			player.SetActive(false);
 			easyTouchControlsCanvas.SetActive(false);

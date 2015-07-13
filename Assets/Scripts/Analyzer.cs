@@ -30,8 +30,9 @@ public class Analyzer
 	
 	public void Do(string musicPath)
 	{
-		Process.Start ("./Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
-		Process.Start ("./Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
+		string dir= Environment.CurrentDirectory;
+		Process.Start (dir+"/Assets/Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
+		Process.Start (dir+"/Assets/Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
 		while (true) {
 			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
 			Process[] prhythm=Process.GetProcessesByName("streaming_predo");
@@ -73,6 +74,7 @@ public class Analyzer
 				}
 			}
 			sr.Close ();
+			Console.WriteLine(melodyList.Peek());
 			/**
 			 * Parsing rhythm.yaml
 			 */

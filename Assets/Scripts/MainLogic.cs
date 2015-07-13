@@ -53,7 +53,7 @@ public class MainLogic : MonoBehaviour {
 
 	public Queue<float> highlightIntervalQueue = new Queue<float>(); 
 	
-	public float currentSpeed = 60;     //当前隧道移动速度
+	public float currentSpeed = 80;     //当前隧道移动速度
 	
 	public float currentOffset = 25;    //当前隧道的间隔
 	
@@ -73,12 +73,12 @@ public class MainLogic : MonoBehaviour {
 	
 	public UISlider hpUI;               //HP进度条
 	
-	public UILabel testUI;
+	public UILabel finalScoreUI;        
 	
 	public UISlider energyUI;           //Energy进度条
 	
 	public UILabel scoreUI;             //分数UI
-	
+
 	public Spwaner spawaner;            //光晕生成器
 	
 	float score;                          //分数
@@ -118,7 +118,6 @@ public class MainLogic : MonoBehaviour {
 		DataManager dm = DataManager.Instance;
 		highlightIntervalQueue = dm.beatList;
 		//test for change highlight
-		/*
 		highlightIntervalQueue.Enqueue (2.7f);
 		highlightIntervalQueue.Enqueue (4.7f);
 		highlightIntervalQueue.Enqueue (3.0f);
@@ -126,8 +125,13 @@ public class MainLogic : MonoBehaviour {
 		highlightIntervalQueue.Enqueue (2.6f);
 		highlightIntervalQueue.Enqueue (3.8f);
 		highlightIntervalQueue.Enqueue (2.7f);
-*/
-
+		highlightIntervalQueue.Enqueue (2.7f);
+		highlightIntervalQueue.Enqueue (4.7f);
+		highlightIntervalQueue.Enqueue (3.0f);
+		highlightIntervalQueue.Enqueue (4.4f);
+		highlightIntervalQueue.Enqueue (2.6f);
+		highlightIntervalQueue.Enqueue (3.8f);
+		highlightIntervalQueue.Enqueue (2.7f);
 
 		//提示轨道偏移
 		//        if (nextDir == -1)
@@ -157,30 +161,11 @@ public class MainLogic : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		testUI.text = nextDir.ToString ();
 
-		Debug.Log (highlightIntervalQueue.Peek ());
-		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
-		{
-			failUI.SetActive(true);
-			Camera.main.transform.parent = null;
-			player.SetActive(false);
-			easyTouchControlsCanvas.SetActive(false);
-			spawaner.gameObject.SetActive(false);
-			hpUI.gameObject.SetActive(false);
-			scoreUI.gameObject.SetActive(false);
-			energyUI.gameObject.SetActive(false);
-			
-			
-			ParseObject testObject = new ParseObject("Score");
-			testObject["score"] = score;
-			testObject.SaveAsync();
-			
-			return;
-		}
-		
+		CheckHp ();
+
 		CheckTrack();
-		
+
 		// gravity 
 		player.transform.RotateAround(pivot.transform.position, Vector3.forward, Time.deltaTime * playerSpeed * Input.acceleration.x * 8);
 		GetCurrentTrack();
@@ -189,7 +174,22 @@ public class MainLogic : MonoBehaviour {
 		dirTimer += Time.deltaTime;     //改变隧道扭曲方向的计时器 + 同时
 		highlightTimer += Time.deltaTime; 
 		scoreHighlightTimer += Time.deltaTime;
-		
+
+
+		GenerateEnviroment ();
+
+		CheckFever ();
+
+	}
+	
+	void LateUpdate()
+	{
+		UpdateHighlight ();
+	}
+	
+
+	void GenerateEnviroment ()
+	{
 		switch (nextHighlight) {  //clone tunnel, elementProfab# as input
 		case 0:
 			CloneTunnel (elementPrefab0);
@@ -225,8 +225,35 @@ public class MainLogic : MonoBehaviour {
 			print ("Incorrect elementPrefab input.");
 			break;
 		}
-		
-		
+
+	}
+
+
+	void CheckHp ()
+	{
+		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
+		{
+			failUI.SetActive(true);
+			finalScoreUI.text = ((int)score).ToString();
+			Camera.main.transform.parent = null;
+			player.SetActive(false);
+			easyTouchControlsCanvas.SetActive(false);
+			spawaner.gameObject.SetActive(false);
+			hpUI.gameObject.SetActive(false);
+			scoreUI.gameObject.SetActive(false);
+			energyUI.gameObject.SetActive(false);
+			
+			
+			ParseObject testObject = new ParseObject("Score");
+			testObject["score"] = score;
+			testObject.SaveAsync();
+			
+			return;
+		}
+	}
+
+	void CheckFever()
+	{
 		//检查能量条是否满足狂热
 		if (energyUI.value == 1 && !boosting)
 		{
@@ -235,19 +262,26 @@ public class MainLogic : MonoBehaviour {
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
 			currentSpeed *= 3;
+			GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
+			foreach (GameObject e in elements1)
+			{
+				e.GetComponent<ElementMovement>().speed = currentSpeed;
+			}
+			GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
+			foreach (GameObject e in elements2)
+			{
+				e.GetComponent<ElementMovement>().speed = -currentSpeed;
+			}
+			
 			interval = currentOffset / currentSpeed;
 			dirInterval /= 2;
 			spawaner.interval /= 2;
 			playerSpeed *= 2f;
 		}
 	}
-	
-	void LateUpdate()
-	{
-		UpdateHighlight ();
-	}
-	
-	
+
+
+
 	void CloneTunnel (GameObject element)
 	{
 		
@@ -305,13 +339,19 @@ public class MainLogic : MonoBehaviour {
 		spawaner.interval *= 2;
 		playerSpeed /= 2f;
 		interval = currentOffset / currentSpeed;
+
 		GameObject[] elements = GameObject.FindGameObjectsWithTag("Element");
-		
 		foreach (GameObject e in elements)
 		{
 			e.GetComponent<ElementMovement>().speed = currentSpeed;
 		}
-		
+
+		GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
+		foreach (GameObject e in elements2)
+		{
+			e.GetComponent<ElementMovement>().speed = -currentSpeed;
+		}
+
 		hpUI.value += 0.2f;
 	} 
 	

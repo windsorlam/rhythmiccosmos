@@ -13,7 +13,8 @@ public class EndComboTrigger : MonoBehaviour {
 		if (other.collider.gameObject.tag == "Collection") 
 		{
 			logic.ResetCombo ();
-			//logic.hpUI.value -= 0.3f;  //增加HP
+			logic.hpUI.value -= 0.2f;
+			Time.timeScale = 1;
 
 		}
 	}

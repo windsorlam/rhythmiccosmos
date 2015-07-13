@@ -3,9 +3,10 @@ using UnityEngine;
 using System.Collections;
 
 public class ElementMovement : MonoBehaviour {
+	
     public float speed ;     //移动速度
     public float deadTime;  //销毁时间
-
+	
 	// Use this for initialization
 	void Start () {
         Destroy(this.gameObject, deadTime);

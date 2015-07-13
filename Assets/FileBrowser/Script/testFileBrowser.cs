@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class testFileBrowser : MonoBehaviour {
 	//skins and textures
@@ -13,7 +14,7 @@ public class testFileBrowser : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//setup file browser style
-		fb.guiSkin = skins[0]; //set the starting skin
+		//fb.guiSkin = skins[0]; //set the starting skin
 		//set the various textures
 		fb.fileTexture = file; 
 		fb.directoryTexture = folder;
@@ -48,10 +49,15 @@ public class testFileBrowser : MonoBehaviour {
 		//draw and display output
 		if(fb.draw()){ //true is returned when a file has been selected
 			//the output file is a member if the FileInfo class, if cancel was selected the value is null
-			output = (fb.outputFile==null)?"cancel hit":fb.outputFile.ToString();
+			//output = (fb.outputFile==null)?"cancel hit":fb.outputFile.ToString();
 			if(fb.outputFile==null){
 				Application.LoadLevel("Main");
 			}else{
+				string path=fb.outputFile.ToString();
+				Analyzer analyzer=new Analyzer();
+				analyzer.Do(path);
+				DataManager dm=DataManager.Instance;
+				Console.WriteLine(dm.beatList.Peek());
 				Application.LoadLevel("Space");
 			}
 		}

@@ -115,8 +115,10 @@ public class MainLogic : MonoBehaviour {
 		//随机偏移方向
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 
+		DataManager dm = DataManager.Instance;
+		highlightIntervalQueue = dm.beatList;
 		//test for change highlight
-
+		/*
 		highlightIntervalQueue.Enqueue (2.7f);
 		highlightIntervalQueue.Enqueue (4.7f);
 		highlightIntervalQueue.Enqueue (3.0f);
@@ -124,7 +126,7 @@ public class MainLogic : MonoBehaviour {
 		highlightIntervalQueue.Enqueue (2.6f);
 		highlightIntervalQueue.Enqueue (3.8f);
 		highlightIntervalQueue.Enqueue (2.7f);
-
+*/
 
 
 		//提示轨道偏移

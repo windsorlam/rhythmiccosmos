@@ -12,8 +12,7 @@ public class PauseClick : MonoBehaviour {
 		{
 			Time.timeScale += 0.0002f;
 		}
-		
-		Debug.Log (Time.timeScale);
+
 	}
 
 

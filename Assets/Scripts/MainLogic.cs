@@ -19,8 +19,10 @@ public class MainLogic : MonoBehaviour {
 	public GameObject elementPrefab7;
 	public GameObject elementPrefab8;
 	public GameObject elementPrefab9;
-	
-	
+
+	public Material[] skyboxMats;
+	public GameObject[] airCrafts;
+
 	public Material polygonMat;         //10边形的材质
 	public Material highlightMat;       //轨道高亮的材质
 	public Material[] originalMat;        //轨道原本的材质
@@ -83,14 +85,12 @@ public class MainLogic : MonoBehaviour {
 	
 	float score;                          //分数
 	
-	int combo;                          //连击
-	
-	//	bool sharpFlag = true;         
+	int combo;                          //连击   
 	
 	public Transform tracers;       //面板物体"Tracers"
 	
 	bool boosting = false;      //是否狂热
-	
+
 	public GameObject failUI;
 	
 	public GameObject feverUI;
@@ -115,8 +115,11 @@ public class MainLogic : MonoBehaviour {
 		//随机偏移方向
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 
-		//test for change highlight
+		Camera.main.GetComponent<Skybox> ().material = skyboxMats[Setting.index]; 
+		airCrafts [Setting.planeIndex].SetActive (true);
 
+
+		//test for change highlight
 		highlightIntervalQueue.Enqueue (2.7f);
 		highlightIntervalQueue.Enqueue (4.7f);
 		highlightIntervalQueue.Enqueue (3.0f);
@@ -248,7 +251,7 @@ public class MainLogic : MonoBehaviour {
 			hpUI.gameObject.SetActive(false);
 			scoreUI.gameObject.SetActive(false);
 			energyUI.gameObject.SetActive(false);
-			
+			comboUI.GetComponent<UILabel>().color = new Color(1, 125/255f, 0, 0);
 			
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;

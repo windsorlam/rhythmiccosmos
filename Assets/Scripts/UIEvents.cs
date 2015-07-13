@@ -4,10 +4,10 @@ using UnityEngine;
 using System.Collections;
 
 public class UIEvents : MonoBehaviour {
-
+	
 	// Use this for initialization
 	void Start () {
-	
+
 	}
 	
 	// Update is called once per frame
@@ -15,7 +15,13 @@ public class UIEvents : MonoBehaviour {
 	
 	}
 
-    public void OnStartClick()
+	public void OnRestartClick()
+	{
+		Application.LoadLevel("Space");
+	}
+
+
+	public void OnStartClick()
     {
         Application.LoadLevel("MusicChooser");
     }
@@ -40,5 +46,9 @@ public class UIEvents : MonoBehaviour {
 		Application.LoadLevel ("Space");
 	}
 
+	public void OnSettingClick()
+	{
+		Application.LoadLevel ("Setting");
+	}
 
 }

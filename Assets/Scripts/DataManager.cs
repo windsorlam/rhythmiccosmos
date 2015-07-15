@@ -16,6 +16,7 @@ public class DataManager
 	public Queue<float> beatList = null;
 	public Queue<float> onsetList = null;
 	public Queue<float> melodyList = null;
+	public string musicPath = null;
 	
 	private DataManager ()
 	{

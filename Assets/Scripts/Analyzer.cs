@@ -107,6 +107,7 @@ public class Analyzer
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
+			dm.musicPath=musicPath;
 		}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());
 			return;

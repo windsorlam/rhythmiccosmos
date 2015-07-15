@@ -4,13 +4,12 @@ using System;
 
 public class testFileBrowser : MonoBehaviour {
 	//skins and textures
-	public GUISkin[] skins;
+//	public GUISkin[] skins;
 	public Texture2D file,folder,back,drive;
 	
-	string[] layoutTypes = {"Type 0","Type 1"};
+//	string[] layoutTypes = {"Type 0","Type 1"};
 	//initialize file browser
 	FileBrowser fb = new FileBrowser();
-	string output = "no file";
 	// Use this for initialization
 	void Start () {
 		//setup file browser style
@@ -27,7 +26,7 @@ public class testFileBrowser : MonoBehaviour {
 	}
 	
 	void OnGUI(){
-		GUILayout.BeginHorizontal();
+		/*GUILayout.BeginHorizontal();
 		GUILayout.BeginVertical();
 		GUILayout.Label("Layout Type");
 		fb.setLayout(GUILayout.SelectionGrid(fb.layoutType,layoutTypes,1));
@@ -45,7 +44,7 @@ public class testFileBrowser : MonoBehaviour {
 		GUILayout.EndVertical();
 		GUILayout.Space(10);
 		//GUILayout.Label("Selected File: "+output);
-		GUILayout.EndHorizontal();
+		GUILayout.EndHorizontal();*/
 		//draw and display output
 		if(fb.draw()){ //true is returned when a file has been selected
 			//the output file is a member if the FileInfo class, if cancel was selected the value is null

@@ -118,29 +118,8 @@ public class MainLogic : MonoBehaviour {
 		Camera.main.GetComponent<Skybox> ().material = skyboxMats[Setting.index]; 
 		airCrafts [Setting.planeIndex].SetActive (true);
 
-
-		//test for change highlight
-		highlightIntervalQueue.Enqueue (2.7f);
-		highlightIntervalQueue.Enqueue (4.7f);
-		highlightIntervalQueue.Enqueue (3.0f);
-		highlightIntervalQueue.Enqueue (4.4f);
-		highlightIntervalQueue.Enqueue (2.6f);
-		highlightIntervalQueue.Enqueue (3.8f);
-		highlightIntervalQueue.Enqueue (2.7f);
-		highlightIntervalQueue.Enqueue (2.7f);
-		highlightIntervalQueue.Enqueue (4.7f);
-		highlightIntervalQueue.Enqueue (3.0f);
-		highlightIntervalQueue.Enqueue (4.4f);
-		highlightIntervalQueue.Enqueue (2.6f);
-		highlightIntervalQueue.Enqueue (3.8f);
-		highlightIntervalQueue.Enqueue (2.7f);
-		highlightIntervalQueue.Enqueue (2.7f);
-		highlightIntervalQueue.Enqueue (4.7f);
-		highlightIntervalQueue.Enqueue (3.0f);
-		highlightIntervalQueue.Enqueue (4.4f);
-		highlightIntervalQueue.Enqueue (2.6f);
-		highlightIntervalQueue.Enqueue (3.8f);
-		highlightIntervalQueue.Enqueue (2.7f);
+		DataManager dm=DataManager.Instance;
+		highlightIntervalQueue =  dm.beatList;
 
 		//提示轨道偏移
 		//        if (nextDir == -1)

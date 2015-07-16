@@ -28,5 +28,6 @@ public class DataManager
 			return instance;
 		}
 	}
-}
 
+	public float progress=0.0f;
+}

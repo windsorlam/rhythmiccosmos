@@ -6,6 +6,8 @@ public class testFileBrowser : MonoBehaviour {
 	//skins and textures
 //	public GUISkin[] skins;
 	public Texture2D file,folder,back,drive;
+	public GameObject slider;
+
 	
 //	string[] layoutTypes = {"Type 0","Type 1"};
 	//initialize file browser
@@ -52,13 +54,17 @@ public class testFileBrowser : MonoBehaviour {
 			if(fb.outputFile==null){
 				Application.LoadLevel("Main");
 			}else{
+				slider.SetActive (true);
 				string path=fb.outputFile.ToString();
-				Analyzer analyzer=new Analyzer();
-				analyzer.Do(path);
 				DataManager dm=DataManager.Instance;
-				Console.WriteLine(dm.beatList.Peek());
-				Application.LoadLevel("Space");
+				dm.musicPath=path;
 			}
 		}
+
 	}
+
+
+
+
+
 }

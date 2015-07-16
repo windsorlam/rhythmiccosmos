@@ -33,25 +33,33 @@ public class Analyzer
 		string dir= Environment.CurrentDirectory;
 		Process.Start (dir+"/Assets/Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
 		Process.Start (dir+"/Assets/Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
+		DataManager dm=DataManager.Instance;
 		while (true) {
 			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
+			dm.progress+=3f;
 			Process[] prhythm=Process.GetProcessesByName("streaming_predo");
+			dm.progress+=3f;
 			if(pmelody.Length==0&&prhythm.Length==0){
 				break;
 			}
 		}
+		dm.progress = 90f;
 		try{
 			/**
 			 * Parsing melody.yaml
 			 */
-			FileStream fs = new FileStream ("melody.yaml", FileMode.Open);
-			StreamReader sr = new StreamReader (fs);
+			FileStream fs1 = new FileStream ("melody.yaml", FileMode.Open);
+			StreamReader sr1 = new StreamReader (fs1);
+			FileStream fs2=new FileStream("rhythm.yaml",FileMode.Open);
+			StreamReader sr2=new StreamReader(fs2);
+			long fileSize=fs1.Length+fs2.Length;
 			string line;
 			Queue<float> melodyList = new Queue<float>();
 			melodyList.Enqueue (0f);
 			//Console.WriteLine(list[0]);
-			while ((line=sr.ReadLine())!=null) {
+			while ((line=sr1.ReadLine())!=null) {
 				//Console.WriteLine("line");
+				dm.progress+=(float)line.Length*20f/(float)fileSize;
 				if (line.Contains ("pitch")) {
 					//Console.WriteLine("pitch");
 					string[] tokens = line.Trim ("pitch: []".ToCharArray ()).Split (',');
@@ -73,16 +81,15 @@ public class Analyzer
 					break;
 				}
 			}
-			sr.Close ();
-			Console.WriteLine(melodyList.Peek());
+			sr1.Close ();
 			/**
 			 * Parsing rhythm.yaml
 			 */
-			fs=new FileStream("rhythm.yaml",FileMode.Open);
-			sr=new StreamReader(fs);
+
 			Queue<float> beatList=new Queue<float>();
 			Queue<float> onsetList=new Queue<float>();
-			while ((line=sr.ReadLine())!=null){
+			while ((line=sr2.ReadLine())!=null){
+				dm.progress+=(float)line.Length*20f/(float)fileSize;
 				if(line.Contains("beats_position")){
 					string[] tokens=line.Trim("beats_position: []".ToCharArray()).Split(',');
 					double lasttime=0.0;
@@ -102,12 +109,11 @@ public class Analyzer
 					break;
 				}
 			}
-			sr.Close();
-			DataManager dm=DataManager.Instance;
+			sr2.Close();
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
-			dm.musicPath=musicPath;
+			dm.progress=100f;
 		}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());
 			return;

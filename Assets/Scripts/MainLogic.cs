@@ -263,7 +263,7 @@ public class MainLogic : MonoBehaviour {
 			
 			interval = currentOffset / currentSpeed;
 			dirInterval /= 2;
-			spawaner.interval /= 2;
+			//spawaner.interval /= 2;
 			playerSpeed *= 2f;
 		}
 	}
@@ -324,7 +324,7 @@ public class MainLogic : MonoBehaviour {
 		boosting = false;
 		currentSpeed /= 3;
 		dirInterval *= 2;
-		spawaner.interval *= 2;
+		//spawaner.interval *= 2;
 		playerSpeed /= 2f;
 		interval = currentOffset / currentSpeed;
 

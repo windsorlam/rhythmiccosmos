@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 public class Analyzer
 {
-	public static int LENGTH=3;
+	public static float LENGTH=0.003f;
 	public static double[] noteFreqArr = {0.0,27.5,29.1,30.9,32.7,34.6,36.7,38.9,41.2,43.7,46.2,49.0,51.0,55.0,58.3,61.7,
 		65.4,69.3,73.4,77.8,82.4,87.3,92.5,98.0,103.8,110.0,116.5,123.5,
 		130.8,138.6,146.8,155.6,164.8,174.6,185.0,196.0,207.7,220.0,233.1,246.9,
@@ -36,14 +36,15 @@ public class Analyzer
 		DataManager dm=DataManager.Instance;
 		while (true) {
 			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
-			dm.progress+=3f;
+			for(int i=0;i<300;i++)dm.progress+=0.01f;
 			Process[] prhythm=Process.GetProcessesByName("streaming_predo");
-			dm.progress+=3f;
+			for(int i=0;i<300;i++)dm.progress+=0.01f;
 			if(pmelody.Length==0&&prhythm.Length==0){
 				break;
 			}
 		}
-		dm.progress = 90f;
+		for (; dm.progress<90; dm.progress+=0.01f)
+			;
 		try{
 			/**
 			 * Parsing melody.yaml
@@ -95,7 +96,10 @@ public class Analyzer
 					double lasttime=0.0;
 					for(int i=0;i<tokens.Length;i++){
 						double time=double.Parse(tokens[i]);
-						beatList.Enqueue((float)(time-lasttime));
+						double interval=time-lasttime;
+						if(interval<2.5)
+							continue;
+						beatList.Enqueue((float)(interval));
 						lasttime=time;
 					}
 				}else if(line.Contains("onset_times")){
@@ -103,7 +107,10 @@ public class Analyzer
 					double lasttime=0.0;
 					for(int i=0;i<tokens.Length;i++){
 						double time=double.Parse(tokens[i]);
-						onsetList.Enqueue((float)(time-lasttime));
+						double interval=time-lasttime;
+						if(interval<2.5)
+							continue;
+						onsetList.Enqueue((float)(interval));
 						lasttime=time;
 					}
 					break;
@@ -113,7 +120,7 @@ public class Analyzer
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
-			dm.progress=100f;
+			for (; dm.progress<100; dm.progress+=0.01f);
 		}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());
 			return;

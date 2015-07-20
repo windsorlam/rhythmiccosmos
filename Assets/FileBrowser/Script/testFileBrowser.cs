@@ -4,8 +4,9 @@ using System;
 
 public class testFileBrowser : MonoBehaviour {
 	//skins and textures
-//	public GUISkin[] skins;
+	public GUISkin skin;
 	public Texture2D file,folder,back,drive;
+	//public GUIStyle cancelStyle,selectStyle;
 	public GameObject slider;
 
 	
@@ -15,12 +16,14 @@ public class testFileBrowser : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//setup file browser style
-		//fb.guiSkin = skins[0]; //set the starting skin
+		fb.guiSkin = skin; //set the starting skin
 		//set the various textures
 		fb.fileTexture = file; 
 		fb.directoryTexture = folder;
 		fb.backTexture = back;
 		fb.driveTexture = drive;
+		//fb.cancelStyle = cancelStyle;
+		//fb.selectStyle = selectStyle;
 		//show the search bar
 		fb.showSearch = true;
 		//search recursively (setting recursive search may cause a long delay)

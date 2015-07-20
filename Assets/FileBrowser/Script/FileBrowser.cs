@@ -126,17 +126,16 @@ public class FileBrowser{
 							}
 							GUILayout.EndScrollView();
 						}
-						GUILayout.BeginHorizontal("box");
-						GUILayout.FlexibleSpace();
+						GUILayout.BeginHorizontal();
 						if((cancelStyle == null)?GUILayout.Button("Cancel"):GUILayout.Button("Cancel",cancelStyle)){
 							outputFile = null;
 							return true;
 						}
-						GUILayout.FlexibleSpace();
+						//GUILayout.FlexibleSpace();
 						if((selectStyle == null)?GUILayout.Button("Select"):GUILayout.Button("Select",selectStyle)){
 							return true;
 						}
-						GUILayout.FlexibleSpace();
+						//GUILayout.FlexibleSpace();
 						GUILayout.EndHorizontal();
 					GUILayout.EndVertical();
 				GUILayout.EndHorizontal();
@@ -246,39 +245,61 @@ public class FileBrowser{
 		//set current directory
 		currentDirectory = di;
 		//get parent
-		if(backTexture)
-			parentDir = (di.Parent==null)?new DirectoryInformation(di,backTexture):new DirectoryInformation(di.Parent,backTexture);
+		if (backTexture)
+			parentDir = (di.Parent == null) ? new DirectoryInformation (di, backTexture) : new DirectoryInformation (di.Parent, backTexture);
 		else
-			parentDir = (di.Parent==null)?new DirectoryInformation(di):new DirectoryInformation(di.Parent);
-		showDrives = di.Parent==null;
+			parentDir = (di.Parent == null) ? new DirectoryInformation (di) : new DirectoryInformation (di.Parent);
+		showDrives = di.Parent == null;
 		
 		//get drives
-		string[] drvs = System.IO.Directory.GetLogicalDrives();
+		string[] drvs = System.IO.Directory.GetLogicalDrives ();
 		drives = new DirectoryInformation[drvs.Length];
-		for(int v=0;v<drvs.Length;v++){
-			drives[v]= (driveTexture==null)?new DirectoryInformation(new DirectoryInfo(drvs[v])):new DirectoryInformation(new DirectoryInfo(drvs[v]),driveTexture);
+		for (int v=0; v<drvs.Length; v++) {
+			drives [v] = (driveTexture == null) ? new DirectoryInformation (new DirectoryInfo (drvs [v])) : new DirectoryInformation (new DirectoryInfo (drvs [v]), driveTexture);
 		}
 		
 		//get directories
-		DirectoryInfo[] dia = di.GetDirectories();
+		DirectoryInfo[] dia = di.GetDirectories ();
 		directories = new DirectoryInformation[dia.Length];
-		for(int d=0;d<dia.Length;d++){
-			if(directoryTexture)
-				directories[d] = new DirectoryInformation(dia[d],directoryTexture);
+		for (int d=0; d<dia.Length; d++) {
+			if (directoryTexture)
+				directories [d] = new DirectoryInformation (dia [d], directoryTexture);
 			else
-				directories[d] = new DirectoryInformation(dia[d]);
+				directories [d] = new DirectoryInformation (dia [d]);
 		}
 		
 		//get files
-		FileInfo[] fia = di.GetFiles(searchPattern);
+		FileInfo[] fia = di.GetFiles (searchPattern);
 		//FileInfo[] fia = searchDirectory(di,searchPattern);
-		files = new FileInformation[fia.Length];
-		for(int f=0;f<fia.Length;f++){
-			if(fileTexture)
-				files[f] = new FileInformation(fia[f],fileTexture);
-			else
-				files[f] = new FileInformation(fia[f]);
+		int size = 0;
+		for (int i=0; i<fia.Length; i++) {
+			if(isMusicFile(fia[i])){
+				size++;
+			}
 		}
+		files = new FileInformation[size];
+		for(int f=0,i=0;f<fia.Length;f++){
+			if(isMusicFile(fia[f])){
+				if(fileTexture)
+					files[i] = new FileInformation(fia[f],fileTexture);
+				else
+					files[i] = new FileInformation(fia[f]);
+				i++;
+			}
+		}
+	}
+
+	private bool isMusicFile(FileInfo file){
+		string[] suffixes = {"wav","mp3","ogg","flac","ape","wma","aac","aiff","midi","rm","ra","rmx","au","vqf","amr"};
+		string name = file.Name;
+		bool isMusic = false;
+		foreach (string suffix in suffixes) {
+			if(name.EndsWith("."+suffix)){
+				isMusic=true;
+				break;
+			}
+		}
+		return isMusic;
 	}
 	
 	

@@ -26,7 +26,9 @@ public class MainLogic : MonoBehaviour {
 	public Material polygonMat;         //10边形的材质
 	public Material highlightMat;       //轨道高亮的材质
 	public Material[] originalMat;        //轨道原本的材质
-	
+
+	private float time = 0;
+
 	public int nextHighlight = 0;           //高亮的轨道索引, next time
 	
 	int currentHighlight = 0;        //高亮的轨道索引, current
@@ -100,6 +102,10 @@ public class MainLogic : MonoBehaviour {
 	public GameObject[] WarnUI; //0:向左的UI，1：向右的UI
 	
 	public UISlider warnTimerBar; //提示时间条
+
+	AudioSource music;
+
+
 	// Use this for initialization
 	void Start () {
 		interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
@@ -111,6 +117,8 @@ public class MainLogic : MonoBehaviour {
 		GetCurrentTrack();  //找到玩家飞船所属的轨道
 		
 		ResetCombo();   //连击重置
+
+		music = Camera.main.GetComponent<AudioSource> ();
 		
 		//随机偏移方向
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
@@ -249,21 +257,11 @@ public class MainLogic : MonoBehaviour {
 			boosting = true;
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
-			currentSpeed *= 3;
-			GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
-			foreach (GameObject e in elements1)
-			{
-				e.GetComponent<ElementMovement>().speed = currentSpeed;
-			}
-			GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-			foreach (GameObject e in elements2)
-			{
-				e.GetComponent<ElementMovement>().speed = -currentSpeed;
-			}
-			
-			interval = currentOffset / currentSpeed;
-			dirInterval /= 2;
-			//spawaner.interval /= 2;
+
+			Time.timeScale = 1.2f;
+			music.pitch = 1.2f;
+
+		
 			playerSpeed *= 2f;
 		}
 	}
@@ -322,23 +320,12 @@ public class MainLogic : MonoBehaviour {
 	{
 		feverUI.SetActive (false);
 		boosting = false;
-		currentSpeed /= 3;
-		dirInterval *= 2;
-		//spawaner.interval *= 2;
+
+		music.pitch = 1.0f;
+
+		Time.timeScale = 1.0f;
+
 		playerSpeed /= 2f;
-		interval = currentOffset / currentSpeed;
-
-		GameObject[] elements = GameObject.FindGameObjectsWithTag("Element");
-		foreach (GameObject e in elements)
-		{
-			e.GetComponent<ElementMovement>().speed = currentSpeed;
-		}
-
-		GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-		foreach (GameObject e in elements2)
-		{
-			e.GetComponent<ElementMovement>().speed = -currentSpeed;
-		}
 
 		hpUI.value += 0.2f;
 	} 

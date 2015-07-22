@@ -47,7 +47,7 @@ public class Spwaner :  MonoBehaviour
             g.transform.position = t.position;          //光晕的位置与欧拉角和t一致
             g.transform.eulerAngles = t.eulerAngles;
 			g.GetComponent<ElementMovement>().speed = -speed;
-			g.transform.RotateAround(this.transform.position, Vector3.forward, Random.Range((current-1) * 36 , (current+1) * 36));//光晕随机绕Spwaner旋转
+			g.transform.RotateAround(this.transform.position, Vector3.forward, Random.Range(current * 36 , (current+1) * 36));//光晕随机绕Spwaner旋转
         }
 	}
 }

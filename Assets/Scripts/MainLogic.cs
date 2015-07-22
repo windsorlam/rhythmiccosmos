@@ -51,7 +51,7 @@ public class MainLogic : MonoBehaviour {
 	
 	float scoreHighlightTimer = 0;
 	
-	public float dirInterval = 5;       //每隔5秒改变一次隧道方向
+	public Queue<float> dirIntervalQueue = new Queue<float>();        
 	
 	public float highlightInterval = 4; //Change highlight tracks
 
@@ -128,6 +128,7 @@ public class MainLogic : MonoBehaviour {
 
 		DataManager dm=DataManager.Instance;
 		highlightIntervalQueue =  dm.beatList;
+		dirIntervalQueue = dm.onsetList; 
 
 		//提示轨道偏移
 		//        if (nextDir == -1)
@@ -148,7 +149,7 @@ public class MainLogic : MonoBehaviour {
 	{
 		warnTimerBar.gameObject.SetActive(true);
 		warnTimerBar.value = 1;
-		DOTween.To(() => warnTimerBar.value, x => warnTimerBar.value = x, 0, dirInterval - 2).SetEase(Ease.Linear).OnComplete(OnTimeEnd);
+		//DOTween.To(() => warnTimerBar.value, x => warnTimerBar.value = x, 0, dirInterval - 2).SetEase(Ease.Linear).OnComplete(OnTimeEnd);
 	}
 	void OnTimeEnd()
 	{
@@ -231,6 +232,7 @@ public class MainLogic : MonoBehaviour {
 		{
 			failUI.SetActive(true);
 			finalScoreUI.text = ((int)score).ToString();
+			Camera.main.GetComponent<AudioSource>().mute = true;
 			Camera.main.transform.parent = null;
 			player.SetActive(false);
 			easyTouchControlsCanvas.SetActive(false);
@@ -279,10 +281,11 @@ public class MainLogic : MonoBehaviour {
 			timer = 0;      //计时器复位
 		}
 		
-		if (dirTimer > dirInterval) //同上，改变扭曲方向
+		if (dirTimer > dirIntervalQueue.Peek()) //同上，改变扭曲方向
 		{
+
 			dirTimer = 0;
-			ChangeDir(dirInterval-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			ChangeDir(highlightIntervalQueue.Dequeue()-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
 		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
@@ -406,17 +409,17 @@ public class MainLogic : MonoBehaviour {
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 		
 		//提示轨道偏移
-		if (nextDir == -1)
-		{
-			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
-			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
-			
-		}
-		else
-		{
-			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
-			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
-		}
+//		if (nextDir == -1)
+//		{
+//			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//			
+//		}
+//		else
+//		{
+//			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//		}
 	}
 	
 	

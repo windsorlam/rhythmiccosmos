@@ -24,7 +24,12 @@ public class ProgressBar : MonoBehaviour {
 		progressBar.value=dm.progress;
 		if (analysisFinished) {
 			aDelegate.EndInvoke(ar);
-			Application.LoadLevel("Space");
+			if( UIEvents.multiMode ){
+				Application.LoadLevel("MultiSpace");
+			}else{
+				Application.LoadLevel("Space");
+			}
+
 		}
 	}
 

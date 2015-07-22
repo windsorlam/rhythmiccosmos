@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections;
 
 public class UIEvents : MonoBehaviour {
-	
+	public static bool multiMode = false;
 	// Use this for initialization
 	void Start () {
 
@@ -17,13 +17,18 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnRestartClick()
 	{
-		Application.LoadLevel("Space");
+		if (multiMode) {
+			MultiManager.ShutDown();
+			Application.LoadLevel ("MultiSpace");
+		} else {
+			Application.LoadLevel("Space");
+		}
 	}
 
 
 	public void OnStartClick()
     {
-        Application.LoadLevel("MusicChooser");
+        Application.LoadLevel("MultiStart");
     }
 
     public void OnQuitClick()
@@ -33,6 +38,7 @@ public class UIEvents : MonoBehaviour {
 
     public void OnMainMenu()
     {
+		multiMode = false;
         Application.LoadLevel("Main");
     }
 
@@ -49,6 +55,18 @@ public class UIEvents : MonoBehaviour {
 	public void OnSettingClick()
 	{
 		Application.LoadLevel ("Setting");
+	}
+
+	public void OnMultiClick()
+	{
+		multiMode = true;
+		Application.LoadLevel ("MultiSpace");
+	}
+
+	public void OnSingleClick() 
+	{
+		multiMode = false;
+		Application.LoadLevel ("MusicChooser");
 	}
 
 }

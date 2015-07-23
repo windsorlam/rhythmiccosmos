@@ -103,6 +103,8 @@ public class MainLogic : MonoBehaviour {
 	
 	public UISlider warnTimerBar; //提示时间条
 
+	public float distance = 0;
+
 	AudioSource music;
 
 
@@ -172,6 +174,7 @@ public class MainLogic : MonoBehaviour {
 		highlightTimer += Time.deltaTime; 
 		scoreHighlightTimer += Time.deltaTime;
 
+		distance += currentSpeed * Time.deltaTime * Time.timeScale;
 
 		GenerateEnviroment ();
 

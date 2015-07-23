@@ -99,7 +99,7 @@ public class Analyzer
 					for(int i=0;i<tokens.Length;i++){
 						double time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						if(interval<2.5)
+						if(interval<2.2)
 							continue;
 						beatList.Enqueue((float)(interval));
 						lasttime=time;

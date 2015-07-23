@@ -7,26 +7,34 @@ public class PauseClick : MonoBehaviour {
 	private float time;
 	AudioSource music;
 	float timer = 0;
-	float startPoint = 175 / 80;
+	float startPoint = 180.5f / 80;
 
 	void Start()
 	{
 		music = Camera.main.GetComponent<AudioSource> ();
+		StartCoroutine( PlaySoundAfterDelay( music, startPoint ) );
+
 	}
 
 
 	void Update()
 	{
-		timer += Time.deltaTime; 
-//		if (Time.timeScale < 1.5 && !paused)
-//		{
-//			Time.timeScale += 0.0002f;
-//		}
-		if (!music.isPlaying && !paused  && timer > startPoint) 
-		{
-			music.Play();
-		}
+	
 
+//		if (!music.isPlaying && Time.time > startPoint) 
+//		{
+//			music.Play();
+//		}
+
+	}
+
+
+	IEnumerator PlaySoundAfterDelay( AudioSource audioSource, float delay )
+	{
+		if( audioSource == null )
+			yield break;
+		yield return new WaitForSeconds( delay );
+		audioSource.Play();
 	}
 
 

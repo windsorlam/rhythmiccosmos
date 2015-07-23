@@ -33,8 +33,6 @@ public class Spwaner :  MonoBehaviour
         timer += Time.deltaTime;
         if (timer > haloIntervalQueue.Peek())
         {
-			Debug.Log(timer);
-
 			haloIntervalQueue.Dequeue();
             timer = 0;
 			if(UIEvents.multiMode == true) {

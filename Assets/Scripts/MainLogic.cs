@@ -67,7 +67,7 @@ public class MainLogic : MonoBehaviour {
 	
 	public GameObject pivot;            //中心点，飞船是围绕此中心点旋转
 	
-	GameObject player;                  //玩家飞船
+	public GameObject player;                  //玩家飞船
 	
 	public float playerSpeed;           //飞船的旋转速度
 	
@@ -85,13 +85,13 @@ public class MainLogic : MonoBehaviour {
 
 	public Spwaner spawaner;            //光晕生成器
 	
-	float score;                          //分数
+	public float score;                          //分数
 	
-	int combo;                          //连击   
+	public int combo;                          //连击   
 	
 	public Transform tracers;       //面板物体"Tracers"
 	
-	bool boosting = false;      //是否狂热
+	public bool boosting = false;      //是否狂热
 
 	public GameObject failUI;
 	
@@ -104,6 +104,8 @@ public class MainLogic : MonoBehaviour {
 	public UISlider warnTimerBar; //提示时间条
 
 	public float distance = 0;
+
+	public float speedFactor = 1.0f;
 
 	AudioSource music;
 
@@ -174,7 +176,7 @@ public class MainLogic : MonoBehaviour {
 		highlightTimer += Time.deltaTime; 
 		scoreHighlightTimer += Time.deltaTime;
 
-		distance += currentSpeed * Time.deltaTime * Time.timeScale;
+		distance += currentSpeed * Time.deltaTime * speedFactor;
 
 		GenerateEnviroment ();
 
@@ -244,6 +246,7 @@ public class MainLogic : MonoBehaviour {
 			scoreUI.gameObject.SetActive(false);
 			energyUI.gameObject.SetActive(false);
 			comboUI.GetComponent<UILabel>().color = new Color(1, 125/255f, 0, 0);
+
 			
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;
@@ -263,10 +266,8 @@ public class MainLogic : MonoBehaviour {
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
 
-			Time.timeScale = 1.2f;
-			music.pitch = 1.2f;
+			speedFactor = 1.2f;
 
-		
 			playerSpeed *= 2f;
 		}
 	}
@@ -327,11 +328,9 @@ public class MainLogic : MonoBehaviour {
 		feverUI.SetActive (false);
 		boosting = false;
 
-		music.pitch = 1.0f;
-
-		Time.timeScale = 1.0f;
-
 		playerSpeed /= 2f;
+
+		speedFactor = 1.0f;
 
 		hpUI.value += 0.2f;
 	} 

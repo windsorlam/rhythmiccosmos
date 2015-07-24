@@ -47,9 +47,9 @@ public class MainLogic : MonoBehaviour {
 	
 	float dirTimer = 0;                 //改变隧道扭曲方向的计时器
 	
-	float highlightTimer = 0;
+	public float highlightTimer = 0;
 	
-	float scoreHighlightTimer = 0;
+	float[] scoreHighlightTimer = new float[10];
 	
 	public Queue<float> dirIntervalQueue = new Queue<float>();        
 	
@@ -107,6 +107,9 @@ public class MainLogic : MonoBehaviour {
 
 	public float speedFactor = 1.0f;
 
+	public int index = 0;
+	public int indexFollow = 0;
+
 	AudioSource music;
 
 
@@ -114,13 +117,17 @@ public class MainLogic : MonoBehaviour {
 	void Start () {
 		interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
 		
-		highlightChangeInterval = 150 / currentSpeed; 
+		highlightChangeInterval = 150f / currentSpeed; 
 		
 		player = GameObject.FindGameObjectWithTag("Player");    //找到玩家飞船的GameObject
 		
 		GetCurrentTrack();  //找到玩家飞船所属的轨道
 		
 		ResetCombo();   //连击重置
+
+		for (int i = 0; i < 10; i++) {
+			scoreHighlightTimer[i] = -10000f;
+		}
 
 		music = Camera.main.GetComponent<AudioSource> ();
 		
@@ -174,7 +181,10 @@ public class MainLogic : MonoBehaviour {
 		timer += Time.deltaTime;        //克隆隧道计时器 + 距上次Update函数到此次Update函数所流逝的时间
 		dirTimer += Time.deltaTime;     //改变隧道扭曲方向的计时器 + 同时
 		highlightTimer += Time.deltaTime; 
-		scoreHighlightTimer += Time.deltaTime;
+
+		for (int i = 0; i < 10; i++) {
+			scoreHighlightTimer[i] += Time.deltaTime;
+		}
 
 		distance += currentSpeed * Time.deltaTime * speedFactor;
 
@@ -306,19 +316,24 @@ public class MainLogic : MonoBehaviour {
 			else if (nextHighlight < 0) nextHighlight = 9;
 			
 			highlight.Enqueue(nextHighlight);
-			scoreHighlightTimer = 0; 
+			scoreHighlightTimer[index] = 0; 
+
+			index++; 
+			if(index > 9) index = 0;
+
 			//ChangeHighlight(nextHighlight-nextDir);   //同时改变轨道的高亮
 		}
 		
-		if (scoreHighlightTimer > highlightChangeInterval)
+		if (scoreHighlightTimer[indexFollow] > highlightChangeInterval)
 		{
-			scoreHighlightTimer = -10000f;
+			scoreHighlightTimer[indexFollow] = -10000f;
 			currentHighlight = (int)highlight.Dequeue();
-			
-			
+			Debug.Log("here" + currentHighlight);
+
+			indexFollow++;
+			if(indexFollow > 9) indexFollow = 0;	
 		}
-		
-		
+	
 	}
 	
 	

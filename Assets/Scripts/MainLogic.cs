@@ -26,7 +26,9 @@ public class MainLogic : MonoBehaviour {
 	public Material polygonMat;         //10边形的材质
 	public Material highlightMat;       //轨道高亮的材质
 	public Material[] originalMat;        //轨道原本的材质
-	
+
+	private float time = 0;
+
 	public int nextHighlight = 0;           //高亮的轨道索引, next time
 	
 	int currentHighlight = 0;        //高亮的轨道索引, current
@@ -49,7 +51,7 @@ public class MainLogic : MonoBehaviour {
 	
 	float scoreHighlightTimer = 0;
 	
-	public float dirInterval = 5;       //每隔5秒改变一次隧道方向
+	public Queue<float> dirIntervalQueue = new Queue<float>();        
 	
 	public float highlightInterval = 4; //Change highlight tracks
 
@@ -65,7 +67,7 @@ public class MainLogic : MonoBehaviour {
 	
 	public GameObject pivot;            //中心点，飞船是围绕此中心点旋转
 	
-	GameObject player;                  //玩家飞船
+	public GameObject player;                  //玩家飞船
 	
 	public float playerSpeed;           //飞船的旋转速度
 	
@@ -83,13 +85,13 @@ public class MainLogic : MonoBehaviour {
 
 	public Spwaner spawaner;            //光晕生成器
 	
-	float score;                          //分数
+	public float score;                          //分数
 	
-	int combo;                          //连击   
+	public int combo;                          //连击   
 	
 	public Transform tracers;       //面板物体"Tracers"
 	
-	bool boosting = false;      //是否狂热
+	public bool boosting = false;      //是否狂热
 
 	public GameObject failUI;
 	
@@ -100,6 +102,14 @@ public class MainLogic : MonoBehaviour {
 	public GameObject[] WarnUI; //0:向左的UI，1：向右的UI
 	
 	public UISlider warnTimerBar; //提示时间条
+
+	public float distance = 0;
+
+	public float speedFactor = 1.0f;
+
+	AudioSource music;
+
+
 	// Use this for initialization
 	void Start () {
 		interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
@@ -111,6 +121,8 @@ public class MainLogic : MonoBehaviour {
 		GetCurrentTrack();  //找到玩家飞船所属的轨道
 		
 		ResetCombo();   //连击重置
+
+		music = Camera.main.GetComponent<AudioSource> ();
 		
 		//随机偏移方向
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
@@ -120,6 +132,7 @@ public class MainLogic : MonoBehaviour {
 
 		DataManager dm=DataManager.Instance;
 		highlightIntervalQueue =  dm.beatList;
+		dirIntervalQueue = dm.onsetList; 
 
 		//提示轨道偏移
 		//        if (nextDir == -1)
@@ -140,7 +153,7 @@ public class MainLogic : MonoBehaviour {
 	{
 		warnTimerBar.gameObject.SetActive(true);
 		warnTimerBar.value = 1;
-		DOTween.To(() => warnTimerBar.value, x => warnTimerBar.value = x, 0, dirInterval - 2).SetEase(Ease.Linear).OnComplete(OnTimeEnd);
+		//DOTween.To(() => warnTimerBar.value, x => warnTimerBar.value = x, 0, dirInterval - 2).SetEase(Ease.Linear).OnComplete(OnTimeEnd);
 	}
 	void OnTimeEnd()
 	{
@@ -163,6 +176,7 @@ public class MainLogic : MonoBehaviour {
 		highlightTimer += Time.deltaTime; 
 		scoreHighlightTimer += Time.deltaTime;
 
+		distance += currentSpeed * Time.deltaTime * speedFactor;
 
 		GenerateEnviroment ();
 
@@ -223,6 +237,7 @@ public class MainLogic : MonoBehaviour {
 		{
 			failUI.SetActive(true);
 			finalScoreUI.text = ((int)score).ToString();
+			Camera.main.GetComponent<AudioSource>().mute = true;
 			Camera.main.transform.parent = null;
 			player.SetActive(false);
 			easyTouchControlsCanvas.SetActive(false);
@@ -231,6 +246,7 @@ public class MainLogic : MonoBehaviour {
 			scoreUI.gameObject.SetActive(false);
 			energyUI.gameObject.SetActive(false);
 			comboUI.GetComponent<UILabel>().color = new Color(1, 125/255f, 0, 0);
+
 			
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;
@@ -249,21 +265,9 @@ public class MainLogic : MonoBehaviour {
 			boosting = true;
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
-			currentSpeed *= 3;
-			GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
-			foreach (GameObject e in elements1)
-			{
-				e.GetComponent<ElementMovement>().speed = currentSpeed;
-			}
-			GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-			foreach (GameObject e in elements2)
-			{
-				e.GetComponent<ElementMovement>().speed = -currentSpeed;
-			}
-			
-			interval = currentOffset / currentSpeed;
-			dirInterval /= 2;
-			//spawaner.interval /= 2;
+
+			speedFactor = 1.2f;
+
 			playerSpeed *= 2f;
 		}
 	}
@@ -281,10 +285,11 @@ public class MainLogic : MonoBehaviour {
 			timer = 0;      //计时器复位
 		}
 		
-		if (dirTimer > dirInterval) //同上，改变扭曲方向
+		if (dirTimer > dirIntervalQueue.Peek()) //同上，改变扭曲方向
 		{
+
 			dirTimer = 0;
-			ChangeDir(dirInterval-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			ChangeDir(highlightIntervalQueue.Dequeue()-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
 		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
@@ -322,23 +327,10 @@ public class MainLogic : MonoBehaviour {
 	{
 		feverUI.SetActive (false);
 		boosting = false;
-		currentSpeed /= 3;
-		dirInterval *= 2;
-		//spawaner.interval *= 2;
+
 		playerSpeed /= 2f;
-		interval = currentOffset / currentSpeed;
 
-		GameObject[] elements = GameObject.FindGameObjectsWithTag("Element");
-		foreach (GameObject e in elements)
-		{
-			e.GetComponent<ElementMovement>().speed = currentSpeed;
-		}
-
-		GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-		foreach (GameObject e in elements2)
-		{
-			e.GetComponent<ElementMovement>().speed = -currentSpeed;
-		}
+		speedFactor = 1.0f;
 
 		hpUI.value += 0.2f;
 	} 
@@ -419,17 +411,17 @@ public class MainLogic : MonoBehaviour {
 		nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 		
 		//提示轨道偏移
-		if (nextDir == -1)
-		{
-			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
-			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
-			
-		}
-		else
-		{
-			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
-			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
-		}
+//		if (nextDir == -1)
+//		{
+//			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//			DOTween.To(() => WarnUI[0].GetComponent<UISprite>().color, x => WarnUI[0].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//			
+//		}
+//		else
+//		{
+//			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 1), 0.1f).SetEase(Ease.Linear).SetDelay(1.9f).OnComplete(OnTimeStart);
+//			DOTween.To(() => WarnUI[1].GetComponent<UISprite>().color, x => WarnUI[1].GetComponent<UISprite>().color = x, new Color(1, 0, 0, 0), dirInterval - 2).SetEase(Ease.Linear).SetDelay(2);
+//		}
 	}
 	
 	

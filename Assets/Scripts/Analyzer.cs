@@ -30,10 +30,11 @@ public class Analyzer
 	
 	public void Do(string musicPath)
 	{
+		DataManager dm=DataManager.Instance;
+		dm.progress = 0f;
 		string dir= Environment.CurrentDirectory;
 		Process.Start (dir+"/Assets/Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
 		Process.Start (dir+"/Assets/Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
-		DataManager dm=DataManager.Instance;
 		while (true) {
 			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
 			for(int i=0;i<300;i++)dm.progress+=0.01f;
@@ -56,7 +57,6 @@ public class Analyzer
 			long fileSize=fs1.Length+fs2.Length;
 			string line;
 			Queue<float> melodyList = new Queue<float>();
-			melodyList.Enqueue (0f);
 			//Console.WriteLine(list[0]);
 			while ((line=sr1.ReadLine())!=null) {
 				//Console.WriteLine("line");
@@ -70,14 +70,16 @@ public class Analyzer
 						double parsed=double.Parse(tokens[i]);
 						//Console.WriteLine(parsed);
 						double f = GetFrequency(parsed);
-						if (f == frequency) {
+						if (f == frequency||f==0) {
 							continue;
 						}
 						frequency = f;
 						double time = Analyzer.LENGTH * i;
 						//Console.WriteLine(time+":"+frequency);
-						melodyList.Enqueue ((float)(time-lasttime));
-						lasttime=time;
+						if(time-lasttime>0.2){
+							melodyList.Enqueue ((float)(time-lasttime));
+							lasttime=time;
+						}
 					}
 					break;
 				}
@@ -97,7 +99,7 @@ public class Analyzer
 					for(int i=0;i<tokens.Length;i++){
 						double time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						if(interval<2.5)
+						if(interval<2.2)
 							continue;
 						beatList.Enqueue((float)(interval));
 						lasttime=time;
@@ -108,8 +110,6 @@ public class Analyzer
 					for(int i=0;i<tokens.Length;i++){
 						double time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						if(interval<2.5)
-							continue;
 						onsetList.Enqueue((float)(interval));
 						lasttime=time;
 					}

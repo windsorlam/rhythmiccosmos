@@ -68,15 +68,17 @@ public class MultiManager : MonoBehaviour {
 	//for unity connection test
 	public static string initializethisdevice(string serviceName){
 		NetworkConnectionError error = Network.InitializeServer(3, 10000, false);
+		string ip = "";
 		switch(error){
 		case NetworkConnectionError.NoError:
 			Debug.Log("initialize a server successfully. (@multiManager)");
+			ip = Network.player.ipAddress;
 			break;
 		default:
 			Debug.Log("Faile to initialize a server. Error: " + error + ". (@multiManager)");
 			break;
 		}
-		return Network.player.ipAddress;
+		return ip;
 	}
 	
 	public static void ShutDown(){

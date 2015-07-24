@@ -24,8 +24,10 @@ public class myConnection : MonoBehaviour {
 	string sendMessage = "";
 	string recMessage = "";
 
+	GameObject playButton;
 	////---- RPC part2, for sync 2 fighters *****************************
 
+	public bool dontDestroyOnLoad = true;
 
 	//click a button to start match players, only 2 players at the same time,
 	//and the first one start become the server side, initialize the server and publish service
@@ -36,6 +38,14 @@ public class myConnection : MonoBehaviour {
 		//set label GUI
 		labelStyle.alignment = TextAnchor.MiddleCenter;
 		labelStyle.normal.textColor = Color.white;
+
+		playButton = GameObject.Find("MultiPlayStart");
+		playButton.gameObject.SetActive (false);
+
+		if (dontDestroyOnLoad) {
+			//Makes the object target not be destroyed automatically when loading a new scene.
+			DontDestroyOnLoad (this);
+		}
 
 		//set correct UI according to network's status
 		switch (Network.peerType) {
@@ -154,6 +164,7 @@ public class myConnection : MonoBehaviour {
 			GUILayout.Label("ip: " + Network.player.ipAddress);
 			GUILayout.Label("port: " + Network.player.port);
 			GUILayout.Label("external port: " + Network.player.externalPort);
+			playButton.SetActive(true);
 			break;
 		case "testServer":
 			GUILayout.Label("ip: " + Network.player.ipAddress);
@@ -166,6 +177,9 @@ public class myConnection : MonoBehaviour {
 				GUILayout.Label ("Client IP" + Network.connections [i].ipAddress);  
 				GUILayout.Label ("Client Port" + Network.connections [i].port);
 				GUILayout.Label ("----------------------------------------------");
+			}
+			if( len > 0 ){
+				playButton.SetActive(true);
 			}
 			break;
 		//================================================================================
@@ -262,10 +276,12 @@ public class myConnection : MonoBehaviour {
 	}
 
 	//receive method should declare [RPC]
+	/*
 	[RPC]
 	void ReceiveMessage(string msg, NetworkMessageInfo info){
 		recMessage = "Sender:" + info.sender + "Message:" + msg;
 	}
+	*/
 
 	void Update(){
 		switch (Network.peerType) {
@@ -274,13 +290,13 @@ public class myConnection : MonoBehaviour {
 			//GUIStatus = "testStart";
 			break;
 		case NetworkPeerType.Server:
-			GUIStatus = "server";
-			//GUIStatus = "testServer";
+			//GUIStatus = "server";
+			GUIStatus = "testServer";
 			OnServer();
 			break;
 		case NetworkPeerType.Client:
-			GUIStatus = "client";
-			//GUIStatus = "testClient";
+			//GUIStatus = "client";
+			GUIStatus = "testClient";
 			OnClient();
 			break;
 		case NetworkPeerType.Connecting:

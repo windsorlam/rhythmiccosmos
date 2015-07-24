@@ -75,11 +75,9 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	public UISlider hpUI;               //HP进度条
 	
-	public UILabel finalScoreUI;        
+	        
 	
 	public UISlider energyUI;           //Energy进度条
-	
-	public UILabel scoreUI;             //分数UI
 	
 	public Spwaner spawaner;            //光晕生成器
 	
@@ -91,7 +89,7 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	bool boosting = false;      //是否狂热
 	
-	public GameObject failUI;
+
 	
 	public GameObject feverUI;
 	
@@ -101,19 +99,34 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	public UISlider warnTimerBar; //提示时间条
 
-	public UILabel playerNameUI;
+	public UILabel scoreUI;             //分数UI
+
+	public GameObject failUI;
+	public UILabel finalScoreUI;      //show in failUI
+	public UILabel finalScoreUI_op;
+	public UILabel finalResult;
+
+	public GameObject NetworkFailUI;
+	public UILabel errorHint;
+
+	
+	int networkConnections;
+
+	Vector3 stickPosition;
+	float visibleDistance = 25 * 7.0f;
+	float offsetDistance;
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	float tunnelOffset = 0.0f;
 	float energy = 0.0f;
 	float hp = 1.0f;
-	string playerName = "player";  //it's better to get player's nick name through game center
+	string playerName;  //it's better to get player's nick name through game center
 
 	//multiPlayer
 	GameObject player_op;                  //opponent's aircraft
 	string playerName_op;
 
 	public GameObject comboUI_op;          //连击UI
-	
+	public UILabel playerNameUI;
 	public UISlider hpUI_op;               //HP进度条	       	
 	public UISlider energyUI_op;           //Energy进度条
 	public UILabel scoreUI_op;             //分数UI
@@ -123,21 +136,19 @@ public class MultiMainLogic : MonoBehaviour {
 	float hp_op;
     float energy_op;
 	float tunnelOffset_op = 0.0f;
-	int currentTrack_op;
 	float score_op;
 
+	float score_fore;
+	float score_latter;
+	bool opStop = false;
+
+	RPCLogicHandler _rpcHandler;
 
 	// Use this for initialization
 	void Start () {
 		interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
 		
 		highlightChangeInterval = 150 / currentSpeed; 
-		
-		player = GameObject.FindGameObjectWithTag("Player_my");    //找到玩家飞船的GameObject
-		playerNameUI.text = playerName;
-
-		player_op = GameObject.FindGameObjectWithTag ("Player_op");  //find opponent's aircraft
-		player_op.gameObject.SetActive (false);
 
 		GetCurrentTrack();  //找到玩家飞船所属的轨道
 		
@@ -148,51 +159,62 @@ public class MultiMainLogic : MonoBehaviour {
 		
 		Camera.main.GetComponent<Skybox> ().material = skyboxMats[Setting.index]; 
 		airCrafts [Setting.planeIndex].SetActive (true);
+
+		player = GameObject.FindGameObjectWithTag("Player_my");    //找到玩家飞船的GameObject
+		playerName = playerNameUI.text;
 		
+		player_op = GameObject.FindGameObjectWithTag ("Player_op");  //find opponent's aircraft
+		player_op.gameObject.SetActive (false);
+		
+		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
+		_rpcHandler.SetSceneLoaded (this);
+		
+		score = 0;
+
 		DataManager dm=DataManager.Instance;
 		//highlightIntervalQueue =  dm.beatList;
 	}
-
-
-	/// <summary>
-	/// float hp_op;
-	//int energy_op;
-	//float tunnelOffset_op;
-	//int currentTrack_op;
-	//int score_op;
-	/// </summary>
-	[RPC]
-	void ProccessMoveCommunication(string _playerName, int _currentTrack, float _tunnelOffset, float _energy, float _hp, float _score){
+	
+	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
+		Debug.Log("Network connected.!!!!! process message");
 		playerName_op = _playerName;
 		energy_op = _energy;
 		hp_op = _hp;
 		score_op = _score;
 
-		currentTrack_op = _currentTrack;
 		tunnelOffset_op = _tunnelOffset;
 
 		playerNameUI_op.text = playerName_op;
 		scoreUI_op.text = ((int)score_op).ToString();
-		hpUI_op.value = hp_op;
-		energyUI_op.value = energy_op;
-		//DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
-		//set the aircraft in the correct track
+		hpUI_op.value = _hp;
 
-		player_op.gameObject.SetActive(true);
+		if (_boosting) {
+			energyUI_op.value = energy_op;
+		}
 
 		//calculate the distance between my tunnelOffset and opponent's tunnelOffset, and decide whether show the aircraft
-		//====== test after connected and setActive successfullly
-		//float offsetDistance = tunnelOffset_op - tunnelOffset;
-		//if (offsetDistance <= 50.0f && offsetDistance >= -10.0f) {
-		//	player_op.gameObject.SetActive(true);
-		//}
-		//remember to set aircraft's type
+		offsetDistance = tunnelOffset_op - tunnelOffset;
+		Vector3 visDis = new Vector3 (player.gameObject.transform.position.x + 1.5f, player.gameObject.transform.position.y, player.gameObject.transform.position.z + offsetDistance);
 
+		//visibleDistance
+		if (offsetDistance <= visibleDistance && offsetDistance >= 0.0f) {
+			player_op.gameObject.SetActive (true);
+			player_op.gameObject.transform.position = visDis;
+			player_op.transform.RotateAround(pivot.transform.position, Vector3.forward, Time.deltaTime * playerSpeed * stickPosition.x);
+			//Debug.Log("player_op true");
+			//Debug.Log ("Distance: " + offsetDistance + "TunnelOffeset_op:" + tunnelOffset_op + ".      --- TunnelOffset:" + tunnelOffset);
+		} else {
+			player_op.gameObject.SetActive (false);
+			//Debug.Log("player_op false");
+		}
+		Debug.Log("Network connected.!!!!! process message end");
 	}
 
 	// Update is called once per frame
 	void Update () {
-		
+
+		if(!_rpcHandler.isGameReadyToPlay()) return;
+
 		CheckHp ();    //get current HP value
 		
 		CheckTrack();
@@ -213,12 +235,25 @@ public class MultiMainLogic : MonoBehaviour {
 
 		tunnelOffset += Time.deltaTime * currentSpeed;
 
-		//string _playerName, int _currentTrack, float _tunnelOffset, float _energy, float _hp, int _score
+		//if (Network.peerType == NetworkPeerType.Server) {
+		//	networkConnections = Network.connections.Length;
+		//}
+
+
 		if (Network.peerType == NetworkPeerType.Client || Network.peerType == NetworkPeerType.Server) {
-			networkView.RPC ("ProccessMoveCommunication", RPCMode.All, 
-			                 playerName, currentTrack, tunnelOffset, energy, hp, score);
+			Debug.Log("Network connected.!!!!! going to send message");
+			_rpcHandler.SendMoveCommunication(playerName, tunnelOffset, boosting, energy, hp, score);
+//			networkView.RPC ("ProccessMoveCommunication", RPCMode.Others, playerName, tunnelOffset, boosting, energy, hp, score);
+		} 
+
+		if (Network.peerType == NetworkPeerType.Disconnected || Network.connections.Length <= 0 ) {
+			//_rpcHandler.SendNetworkFailUI();
+			NetworkFailUI.SetActive(true);
 		}
-		
+	} 
+
+	public void ProccessNetworkFailUI(){
+		NetworkFailUI.SetActive(true);
 	}
 	
 	void OnTimeStart()
@@ -279,6 +314,22 @@ public class MultiMainLogic : MonoBehaviour {
 		
 	}
 	
+	public void ProccessFailUI(bool failOP, float _score){
+		if (failOP) {
+			hpUI.value = 0;
+
+			failUI.SetActive(true);
+			finalScoreUI.text = "Your Score: " + ((int)score).ToString();
+			finalScoreUI_op.text = playerName_op + "'s Score: " + ((int)score_op).ToString();
+			if( score >= _score ){
+				finalResult.text = "WIN";
+			}else if(score < _score){
+				finalResult.text = "LOOSE";
+			}
+		}
+		player_op.gameObject.SetActive (false);
+	}
+
 	
 	void CheckHp ()
 	{
@@ -286,9 +337,20 @@ public class MultiMainLogic : MonoBehaviour {
 		if( hpUI.value <= 0 )
 		{
 			failUI.SetActive(true);
-			finalScoreUI.text = ((int)score).ToString();
+			finalScoreUI.text = "Your Score: " + ((int)score).ToString();
+			finalScoreUI_op.text = playerName_op + "'s Score: " + ((int)score_op).ToString();
+			if( score >= score_op ){
+				finalResult.text = "WIN";
+			}else if(score < score_op){
+				finalResult.text = "LOOSE";
+			}
+			
 			Camera.main.transform.parent = null;
-			player.SetActive(false);
+			
+			//player.SetActive(false);
+			currentSpeed = 0.0f;
+			playerSpeed = 0.0f;
+			
 			easyTouchControlsCanvas.SetActive(false);
 			spawaner.gameObject.SetActive(false);
 			hpUI.gameObject.SetActive(false);
@@ -296,42 +358,52 @@ public class MultiMainLogic : MonoBehaviour {
 			energyUI.gameObject.SetActive(false);
 			comboUI.GetComponent<UILabel>().color = new Color(1, 125/255f, 0, 0);
 			
+			//player_op.SetActive(false);
+			hpUI_op.gameObject.SetActive(false);
+			scoreUI_op.gameObject.SetActive(false);
+			energyUI_op.gameObject.SetActive(false);
+			
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;
 			testObject.SaveAsync();
 			
+//			networkView.RPC ("ProccessFailUI", RPCMode.Others, true, score);
+			_rpcHandler.SendProccessFailUI(true, score);
+			player.SetActive(false);
+			player_op.SetActive(false);
 			return;
 		}
+
 	}
-	
-	void CheckFever()
-	{
-		//检查能量条是否满足狂热
-		if (energyUI.value == 1 && !boosting)
+		
+		void CheckFever()
 		{
-			feverUI.SetActive(true);
-			boosting = true;
-			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
-			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
-			currentSpeed *= 3;
-			GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
-			foreach (GameObject e in elements1)
+			//检查能量条是否满足狂热
+			if (energyUI.value == 1 && !boosting)
 			{
-				e.GetComponent<ElementMovement>().speed = currentSpeed;
+				feverUI.SetActive(true);
+				boosting = true;
+				DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
+				DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
+				currentSpeed *= 3;
+				GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
+				foreach (GameObject e in elements1)
+				{
+					e.GetComponent<ElementMovement>().speed = currentSpeed;
+				}
+				GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
+				foreach (GameObject e in elements2)
+				{
+					e.GetComponent<ElementMovement>().speed = -currentSpeed;
+				}
+				
+				interval = currentOffset / currentSpeed;
+				dirInterval /= 2;
+				//spawaner.interval /= 2;
+				playerSpeed *= 2f;
 			}
-			GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-			foreach (GameObject e in elements2)
-			{
-				e.GetComponent<ElementMovement>().speed = -currentSpeed;
-			}
-			
-			interval = currentOffset / currentSpeed;
-			dirInterval /= 2;
-//			spawaner.interval /= 2;
-			playerSpeed *= 2f;
 		}
-	}
-	
+
 	
 	
 	void CloneTunnel (GameObject element)
@@ -467,6 +539,7 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	public void OnJoyStickMove(Vector2 stickPos)
 	{
+		stickPosition = stickPos;
 		player.transform.RotateAround(pivot.transform.position, Vector3.forward, Time.deltaTime * playerSpeed * stickPos.x);//当移动虚拟摇杆，则玩家飞船绕着中心点旋转
 		GetCurrentTrack();  //计算最近的轨道
 	}
@@ -615,7 +688,7 @@ public class MultiMainLogic : MonoBehaviour {
 				minDis = dis;
 			}
 		}
-		
+
 		currentTrack = System.Int32.Parse(minTrack.gameObject.name);
 	}
 }

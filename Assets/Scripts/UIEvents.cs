@@ -18,8 +18,8 @@ public class UIEvents : MonoBehaviour {
 	public void OnRestartClick()
 	{
 		if (multiMode) {
-			MultiManager.ShutDown();
-			Application.LoadLevel ("MultiSpace");
+			Destroy(GameObject.Find("RPCLogicHandler"));
+			Application.LoadLevel ("MultiConnection");
 		} else {
 			Application.LoadLevel("Space");
 		}
@@ -28,7 +28,7 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnStartClick()
     {
-        Application.LoadLevel("MultiStart");
+        Application.LoadLevel("ModeChoose");
     }
 
     public void OnQuitClick()
@@ -38,7 +38,10 @@ public class UIEvents : MonoBehaviour {
 
     public void OnMainMenu()
     {
-		multiMode = false;
+		if (multiMode) {
+			Destroy(GameObject.Find("RPCLogicHandler"));
+			multiMode = false;
+		}
         Application.LoadLevel("Main");
     }
 
@@ -60,13 +63,12 @@ public class UIEvents : MonoBehaviour {
 	public void OnMultiClick()
 	{
 		multiMode = true;
-		Application.LoadLevel ("MultiSpace");
+		Application.LoadLevel ("MultiConnection");
 	}
-
+	
 	public void OnSingleClick() 
 	{
 		multiMode = false;
 		Application.LoadLevel ("MusicChooser");
 	}
-
 }

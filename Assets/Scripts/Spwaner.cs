@@ -19,7 +19,7 @@ public class Spwaner :  MonoBehaviour
 	// Use this for initialization
 	void Start () {
 		DataManager dm=DataManager.Instance;
-		haloIntervalQueue = dm.melodyList;
+		haloIntervalQueue = dm.onsetList;
 	}
 	
 	// Update is called once per frame

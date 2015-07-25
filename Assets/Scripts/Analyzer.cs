@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 public class Analyzer
 {
-	public static float LENGTH=0.003f;
+	public static float LENGTH=0.0029f;
 	public static double[] noteFreqArr = {0.0,27.5,29.1,30.9,32.7,34.6,36.7,38.9,41.2,43.7,46.2,49.0,51.0,55.0,58.3,61.7,
 		65.4,69.3,73.4,77.8,82.4,87.3,92.5,98.0,103.8,110.0,116.5,123.5,
 		130.8,138.6,146.8,155.6,164.8,174.6,185.0,196.0,207.7,220.0,233.1,246.9,
@@ -46,6 +46,7 @@ public class Analyzer
 		}
 		for (; dm.progress<90; dm.progress+=0.01f)
 			;
+		double controlsPerSec = 0.0;
 		try{
 			/**
 			 * Parsing melody.yaml
@@ -58,6 +59,7 @@ public class Analyzer
 			string line;
 			Queue<float> melodyList = new Queue<float>();
 			//Console.WriteLine(list[0]);
+			int i;
 			while ((line=sr1.ReadLine())!=null) {
 				//Console.WriteLine("line");
 				dm.progress+=(float)line.Length*20f/(float)fileSize;
@@ -66,7 +68,8 @@ public class Analyzer
 					string[] tokens = line.Trim ("pitch: []".ToCharArray ()).Split (',');
 					double frequency = 0.0;
 					double lasttime=0.0;
-					for (int i=0; i<tokens.Length; i++) {
+					double time=0.0;
+					for (i=0; i<tokens.Length; i++) {
 						double parsed=double.Parse(tokens[i]);
 						//Console.WriteLine(parsed);
 						double f = GetFrequency(parsed);
@@ -74,13 +77,15 @@ public class Analyzer
 							continue;
 						}
 						frequency = f;
-						double time = Analyzer.LENGTH * i;
+						time = Analyzer.LENGTH * i;
 						//Console.WriteLine(time+":"+frequency);
 						if(time-lasttime>0.2){
 							melodyList.Enqueue ((float)(time-lasttime));
 							lasttime=time;
 						}
 					}
+					Console.WriteLine(i+" "+lasttime+" "+time);
+					controlsPerSec+=melodyList.Count/time;
 					break;
 				}
 			}
@@ -96,23 +101,29 @@ public class Analyzer
 				if(line.Contains("beats_position")){
 					string[] tokens=line.Trim("beats_position: []".ToCharArray()).Split(',');
 					double lasttime=0.0;
-					for(int i=0;i<tokens.Length;i++){
-						double time=double.Parse(tokens[i]);
+					double time=0.0;
+					for(i=0;i<tokens.Length;i++){
+						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
 						if(interval<2.2)
 							continue;
 						beatList.Enqueue((float)(interval));
 						lasttime=time;
 					}
+					Console.WriteLine(i+" "+lasttime+" "+time);
+					controlsPerSec+=beatList.Count/time;
 				}else if(line.Contains("onset_times")){
 					string[] tokens=line.Trim("onset_times: []".ToCharArray()).Split(',');
 					double lasttime=0.0;
-					for(int i=0;i<tokens.Length;i++){
-						double time=double.Parse(tokens[i]);
+					double time=0.0;
+					for(i=0;i<tokens.Length;i++){
+						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
 						onsetList.Enqueue((float)(interval));
 						lasttime=time;
 					}
+					controlsPerSec+=onsetList.Count/time;
+					Console.WriteLine(i+" "+lasttime+" "+time);
 					break;
 				}
 			}
@@ -120,6 +131,8 @@ public class Analyzer
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
+			dm.difficultyRatio=controlsPerSec;
+			Console.WriteLine(dm.difficulty);
 			for (; dm.progress<100; dm.progress+=0.01f);
 		}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());

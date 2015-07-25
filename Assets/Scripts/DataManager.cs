@@ -22,7 +22,7 @@ public class DataManager
 	{
 	}
 	
-	public static DataManager instance=new DataManager();
+	private static DataManager instance=new DataManager();
 	public static DataManager Instance{
 		get{
 			return instance;
@@ -30,4 +30,24 @@ public class DataManager
 	}
 
 	public float progress=0.0f;
+	public double difficultyRatio=0.0;
+	public Difficulty difficulty{
+		get{
+			if(difficultyRatio>5){
+				return Difficulty.Hard;
+			}else{
+				if(difficultyRatio<1){
+					return Difficulty.Easy;
+				}else{
+					return Difficulty.Medium;
+				}
+			}
+		}
+	}
+}
+
+public enum Difficulty{
+	Easy,
+	Medium,
+	Hard
 }

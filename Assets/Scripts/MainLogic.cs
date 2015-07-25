@@ -139,7 +139,7 @@ public class MainLogic : MonoBehaviour {
 
 		DataManager dm=DataManager.Instance;
 		highlightIntervalQueue =  dm.beatList;
-		dirIntervalQueue = dm.onsetList; 
+		dirIntervalQueue = dm.beatList; 
 
 		//提示轨道偏移
 		//        if (nextDir == -1)
@@ -299,7 +299,7 @@ public class MainLogic : MonoBehaviour {
 		{
 
 			dirTimer = 0;
-			ChangeDir(highlightIntervalQueue.Dequeue()-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			ChangeDir(dirIntervalQueue.Dequeue(), new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
 		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight

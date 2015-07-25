@@ -17,12 +17,16 @@ public class DataManager
 	public Queue<float> onsetList = null;
 	public Queue<float> melodyList = null;
 	public string musicPath = null;
+
+	public static string HARD="Hard";
+	public static string MEDIUM="Medium";
+	public static string EASY="Easy";
 	
 	private DataManager ()
 	{
 	}
 	
-	public static DataManager instance=new DataManager();
+	private static DataManager instance=new DataManager();
 	public static DataManager Instance{
 		get{
 			return instance;
@@ -30,4 +34,18 @@ public class DataManager
 	}
 
 	public float progress=0.0f;
+	public double difficultyRatio=0.0;
+	public string difficulty{
+		get{
+			if(difficultyRatio>5){
+				return HARD;
+			}else{
+				if(difficultyRatio<1){
+					return EASY;
+				}else{
+					return MEDIUM;
+				}
+			}
+		}
+	}
 }

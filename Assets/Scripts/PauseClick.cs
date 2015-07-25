@@ -7,7 +7,7 @@ public class PauseClick : MonoBehaviour {
 	private float time;
 	AudioSource music;
 	float timer = 0;
-	float startPoint = 150.5f / 80;
+	float startPoint = 150.7f / 80;
 
 	void Start()
 	{

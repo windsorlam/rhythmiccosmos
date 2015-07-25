@@ -170,6 +170,8 @@ public class MainLogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		Debug.Log (hpUI.value);
+
 		CheckHp ();
 
 		CheckTrack();
@@ -298,7 +300,7 @@ public class MainLogic : MonoBehaviour {
 		if (dirTimer > dirIntervalQueue.Peek()) //同上，改变扭曲方向
 		{
 			dirTimer = 0;
-			ChangeDir(dirIntervalQueue.Dequeue(), new Vector3(Random.Range(-10, 10), Random.Range(-1, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			ChangeDir(dirIntervalQueue.Dequeue() - 0.3f , new Vector3(Random.Range(-8, 8), Random.Range(-1, 8), Random.Range(-8, 8)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
 		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
@@ -327,7 +329,6 @@ public class MainLogic : MonoBehaviour {
 		{
 			scoreHighlightTimer[indexFollow] = -10000f;
 			currentHighlight = (int)highlight.Dequeue();
-			Debug.Log("here" + currentHighlight);
 
 			indexFollow++;
 			if(indexFollow > 9) indexFollow = 0;	

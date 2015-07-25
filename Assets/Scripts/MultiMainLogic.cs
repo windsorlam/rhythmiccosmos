@@ -170,6 +170,7 @@ public class MultiMainLogic : MonoBehaviour {
 		_rpcHandler.SetSceneLoaded (this);
 		
 		score = 0;
+		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
 		//highlightIntervalQueue =  dm.beatList;
@@ -186,7 +187,7 @@ public class MultiMainLogic : MonoBehaviour {
 
 		playerNameUI_op.text = playerName_op;
 		scoreUI_op.text = ((int)score_op).ToString();
-		hpUI_op.value = _hp;
+		hpUI_op.value = hp_op;
 
 		if (_boosting) {
 			energyUI_op.value = energy_op;
@@ -317,6 +318,7 @@ public class MultiMainLogic : MonoBehaviour {
 	public void ProccessFailUI(bool failOP, float _score){
 		if (failOP) {
 			hpUI.value = 0;
+			hp = 0;
 
 			failUI.SetActive(true);
 			finalScoreUI.text = "Your Score: " + ((int)score).ToString();
@@ -499,7 +501,7 @@ public class MultiMainLogic : MonoBehaviour {
 		hpUI.value += 0.2f;
 
 		//====================by lxy
-		hp += 0.2f; 
+		hp = hpUI.value; 
 	} 
 	
 	//检查是否在高亮轨道
@@ -513,14 +515,14 @@ public class MultiMainLogic : MonoBehaviour {
 			scoreUI.text = ((int)score).ToString();     //加分
 
 			//===============by lxy
-			hp += (1 + Time.deltaTime *combo * 0.1f) * Time.deltaTime * 0.2f;
+			hp = hpUI.value;
 		} 
 		else if(!boosting)
 		{
 			hpUI.value -= Time.deltaTime * Time.deltaTime * 10f;  //HP减少
 
 			//================by lxy
-			hp -= Time.deltaTime * Time.deltaTime * 10f;
+			hp = hpUI.value;
 		}
 	}
 
@@ -625,7 +627,7 @@ public class MultiMainLogic : MonoBehaviour {
 		scoreUI.text = ((int)score).ToString();     //加分
 
 		//===============by lxy
-		hp += (1 + combo * 0.1f) * 0.2f;
+		hp = hpUI.value;
 
 		GameObject go = Instantiate(disappearFx) as GameObject;// 生成一个光晕销毁后的粒子特效
 		go.transform.parent = this.transform;    //移动特效到飞机上
@@ -662,8 +664,8 @@ public class MultiMainLogic : MonoBehaviour {
 		energyUI.value += (1f + 2f / combo)/10f;
 
 		//================== by lxy
-		hp += combo / 1000;
-		energy += (1f + 2f / combo) / 10f;   //calculate energy 
+		hp = hpUI.value;
+		energy = energyUI.value;   //calculate energy 
 
 
 		score += (100 + combo)*(boosting ? 2 : 1);

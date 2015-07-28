@@ -28,6 +28,7 @@ public class myConnection : MonoBehaviour {
 	////---- RPC part2, for sync 2 fighters *****************************
 
 	public bool dontDestroyOnLoad = true;
+	public bool connected = false;
 
 	//click a button to start match players, only 2 players at the same time,
 	//and the first one start become the server side, initialize the server and publish service
@@ -85,16 +86,11 @@ public class myConnection : MonoBehaviour {
 		switch (GUIStatus) {
 		case "start":
 			ResetMessage(); //reset all message each time before establish a connection
-			/*
-			if(GUILayout.Button("Start Browsing") && !broStatus){
+
+			if(GUILayout.Button("Start") && !broStatus){
 				//start to match a service for player depends on service type and name
 				StartMatch(); 
 			}
-			if(GUILayout.Button("Start a server") && !broStatus){
-				//start publish a service
-				PublishService();
-			}*/
-			PublishService();
 			break;
 		case "client":
 			GUILayout.Label("Connected server: ["+ foundServiceName + "]");
@@ -196,21 +192,22 @@ public class myConnection : MonoBehaviour {
 	void StartMatch(){
 		switch (Network.peerType) {
 		case NetworkPeerType.Disconnected:
-			StartConnect();
+			StartBrowsing();
 			break;
 		default:
 			break;
 		}
 	}
 
-	void StartConnect(){
+	void StartBrowsing(){
 		//start look up first depend on serviceType
 		if (!broStatus) {
 			broStatus = true;
 			MultiManager.StartLookup (browseServiceType); 
 			Debug.Log ("----> Start Look up.");
-
 			ResetMessage();
+
+			StartCoroutine(WaitAndPrint(5.0f));
 		}else {
 			Debug.Log("----> Browsing service has been started.");
 		}
@@ -242,7 +239,10 @@ public class myConnection : MonoBehaviour {
 	}
 
 	void OnClient(){
-		
+		if (!connected) {
+			GUIStatus = "start";
+			found = false;
+		}
 	}
 
 	////----- Part2 Publish service (as a server)
@@ -303,7 +303,8 @@ public class myConnection : MonoBehaviour {
 			GUIStatus = "connecting";
 			break;
 		}
-
+		Debug.Log ("====> Connection number: " + Network.connections.Length);
+		Debug.Log ("====> network peertype: " + Network.peerType.ToString()); 
 	}
 
 	////************************* client part callback function ***********************************
@@ -373,6 +374,7 @@ public class myConnection : MonoBehaviour {
 		Debug.Log ("----> OnServiceResolved called, connecting to a resolved service");
 		if (MultiManager.ConnectToResolvedService (foundServiceName)) {
 			GUIStatus = "client";
+			connected = true;
 		}
 	}
 
@@ -382,6 +384,7 @@ public class myConnection : MonoBehaviour {
 		GUIStatus = "start";
 		Debug.Log ("----> OnServiceLost called.");
 		statusLabel = "service lost ... ";
+		connected = false;
 	}
 	
 	////************************* server part callback function ***********************************
@@ -421,7 +424,10 @@ public class myConnection : MonoBehaviour {
 	IEnumerator WaitAndPrint(float waitTime)
 	{
 		// pause execution for waitTime seconds
+		print ("----> coroutine Waiting ... ");
 		yield return new WaitForSeconds(waitTime);
-		print ("Waiting ... ");
+		if(!found && !connected){
+			StopBrowsing();
+			PublishService();
 	}
 }

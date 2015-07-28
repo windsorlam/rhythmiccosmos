@@ -421,13 +421,13 @@ public class myConnection : MonoBehaviour {
 		pubStatus = false;
 	}
 
-	IEnumerator WaitAndPrint(float waitTime)
-	{
+	IEnumerator WaitAndPrint(float waitTime){
 		// pause execution for waitTime seconds
 		print ("----> coroutine Waiting ... ");
 		yield return new WaitForSeconds(waitTime);
 		if(!found && !connected){
 			StopBrowsing();
 			PublishService();
+		}
 	}
 }

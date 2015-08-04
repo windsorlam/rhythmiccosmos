@@ -25,10 +25,12 @@ public class myConnection : MonoBehaviour {
 	string recMessage = "";
 
 	GameObject playButton;
+	GameObject selectButton;
 	////---- RPC part2, for sync 2 fighters *****************************
 
 	public bool dontDestroyOnLoad = true;
 	public bool connected = false;
+	public static bool musicSet = false;
 
 	//click a button to start match players, only 2 players at the same time,
 	//and the first one start become the server side, initialize the server and publish service
@@ -41,6 +43,8 @@ public class myConnection : MonoBehaviour {
 		labelStyle.normal.textColor = Color.white;
 
 		playButton = GameObject.Find("MultiPlayStart");
+		selectButton = GameObject.Find ("MultiSelectMusic");
+		selectButton.gameObject.SetActive (false);
 		playButton.gameObject.SetActive (false);
 
 		if (dontDestroyOnLoad) {
@@ -48,138 +52,14 @@ public class myConnection : MonoBehaviour {
 			DontDestroyOnLoad (this);
 		}
 
-		//set correct UI according to network's status
-		switch (Network.peerType) {
-		case NetworkPeerType.Disconnected:
-			//GUIStatus = "start";
-			GUIStatus = "testStart"; //for test connection through unity
-			sendMessage = ""; 
-			recMessage = ""; 
-			break;
-		case NetworkPeerType.Server:
-			GUIStatus = "server";
-			OnServer();
-			break;
-		case NetworkPeerType.Client:
-			GUIStatus = "client";
-			OnClient();
-			break;
-		case NetworkPeerType.Connecting:
-			GUIStatus = "connecting";
-			break;
-		}
+		broStatus = false;
+		StartMatch();
+
+		//GUIStatus = "start";
+		//GUIStatus = "testStart"; 
 
 		//Reset message
-		ResetMessage ();
-
-		//Reset sync variables
-	}
-	
-	//define the GUI
-	void OnGUI(){
-		//indicate the status of connection: searching -> waiting -> done -> stop
-
-		//label display connection status
-		GUILayout.Label (statusLabel, labelStyle);
-
-		//main UI depend on value of GUIStatus
-		switch (GUIStatus) {
-		case "start":
-			ResetMessage(); //reset all message each time before establish a connection
-
-			if(GUILayout.Button("Start") && !broStatus){
-				//start to match a service for player depends on service type and name
-				StartMatch(); 
-			}
-			break;
-		case "client":
-			GUILayout.Label("Connected server: ["+ foundServiceName + "]");
-			if (GUILayout.Button ("Disconnect") && Network.peerType == NetworkPeerType.Client) {
-				StopConnection();
-			}
-
-			//send and receive message from connected peer through unity RPC
-			GUILayout.Box(recMessage);	
-			sendMessage = GUILayout.TextArea (sendMessage);
-			if (GUILayout.Button ("Send")) {
-				networkView.RPC ("ReceiveMessage", RPCMode.All, sendMessage);
-			}
-			break;
-		case "server":
-			GUILayout.Label("Server is running: ["+ publishServiceName + "]");
-			if (GUILayout.Button ("Stop Service") && Network.peerType == NetworkPeerType.Server) {
-				Debug.Log("-----> stop service. onserver");
-				StopPublish();
-			}
-			GUILayout.Label("Our Clients:");
-			int length = Network.connections.Length; 
-			for(int i=0; i<length; i++) {
-				GUILayout.Label ("Client" + i);
-				GUILayout.Label ("Client IP" + Network.connections [i].ipAddress);  
-				GUILayout.Label ("Client Port" + Network.connections [i].port);
-				GUILayout.Label ("------------------------------------------------");
-			}
-	
-			//send and receive message from connected peer through unity RPC
-			GUILayout.Box(recMessage);
-			sendMessage = GUILayout.TextArea (sendMessage);
-			if (GUILayout.Button ("Send")) {
-				networkView.RPC ("ReceiveMessage", RPCMode.All, sendMessage);
-			}
-			break;
-		case "connecting":
-			GUILayout.Label("Connectiong, please waiting ...");
-			break;
-		case "browsing":
-			if( GUILayout.Button ("Stop Browsing") ){
-				justStop = true;
-				StopBrowsing();
-				Debug.Log("----> GUIStatus: browsing ... ");
-			}
-			break;
-		//========= for unity connection test ============================================
-		case "testStart":
-			string thisIP = Network.player.ipAddress;
-			int thisPort = 10000;
-			if (GUILayout.Button ("Start web server")) {
-				thisIP = MultiManager.initializethisdevice(publishServiceName);
-			}
-			if (GUILayout.Button ("Start web client")) {
-				NetworkConnectionError error = Network.Connect (thisIP, thisPort);
-				switch(error){
-				case NetworkConnectionError.NoError:
-					Debug.Log("connect server successfully");
-					break;
-				default:
-					Debug.Log("Client Connecting Status:"+error);
-					break;
-				}
-			}
-			break;
-		case "testClient":
-			GUILayout.Label("ip: " + Network.player.ipAddress);
-			GUILayout.Label("port: " + Network.player.port);
-			GUILayout.Label("external port: " + Network.player.externalPort);
-			playButton.SetActive(true);
-			break;
-		case "testServer":
-			GUILayout.Label("ip: " + Network.player.ipAddress);
-			GUILayout.Label("port: " + Network.player.port);
-			GUILayout.Label("external port: " + Network.player.externalPort);
-			int len = Network.connections.Length; 
-			GUILayout.Label("Our Clients:");
-			for(int i=0; i<len; i++) {
-				GUILayout.Label ("Client" + i);
-				GUILayout.Label ("Client IP" + Network.connections [i].ipAddress);  
-				GUILayout.Label ("Client Port" + Network.connections [i].port);
-				GUILayout.Label ("----------------------------------------------");
-			}
-			if( len > 0 ){
-				playButton.SetActive(true);
-			}
-			break;
-		//================================================================================
-		}
+		//ResetMessage ();
 	}
 
 	//reset all send and received message box
@@ -205,9 +85,9 @@ public class myConnection : MonoBehaviour {
 			broStatus = true;
 			MultiManager.StartLookup (browseServiceType); 
 			Debug.Log ("----> Start Look up.");
-			ResetMessage();
+			//ResetMessage();
 
-			StartCoroutine(WaitAndPrint(5.0f));
+			StartCoroutine(WaitAndPrint(4.0f));
 		}else {
 			Debug.Log("----> Browsing service has been started.");
 		}
@@ -219,7 +99,7 @@ public class myConnection : MonoBehaviour {
 			MultiManager.StopLookup ();
 			Debug.Log ("----> Stop browsing.");
 			
-			ResetMessage ();
+			//ResetMessage ();
 		} else {
 			Debug.Log("----> Browsing service has been stoped.");
 		}
@@ -234,14 +114,23 @@ public class myConnection : MonoBehaviour {
 			GUIStatus = "start";
 			Debug.Log ("----> Stop Connection.");
 			
-			ResetMessage();
+			//ResetMessage();
 		}
 	}
 
 	void OnClient(){
+		playButton.SetActive(true);
 		if (!connected) {
-			GUIStatus = "start";
+			//GUIStatus = "start";
 			found = false;
+		}
+	}
+
+	void OnServer(){
+		if (Network.connections.Length == 1) {
+			if (!musicSet) {
+				selectButton.SetActive (true);  //select Music
+			}
 		}
 	}
 
@@ -252,7 +141,7 @@ public class myConnection : MonoBehaviour {
 			MultiManager.PublishService (publishServiceName, publishServiceType, ListenPort);
 			Debug.Log ("----> Start publishing");
 
-			ResetMessage ();
+			//ResetMessage ();
 		} else {
 			Debug.Log("----> Publish service has been started.");
 		}
@@ -264,15 +153,11 @@ public class myConnection : MonoBehaviour {
 			MultiManager.StopPublishService ();
 			Debug.Log ("----> Stop publishing.");
 			
-			ResetMessage();
+			//ResetMessage();
 		} else {
 			Debug.Log("----> Publish service has been stoped.");
 		}
 
-	}
-
-	void OnServer(){
-		//GUILayout.Label ("I'm a server", labelStyle);
 	}
 
 	//receive method should declare [RPC]
@@ -291,20 +176,18 @@ public class myConnection : MonoBehaviour {
 			break;
 		case NetworkPeerType.Server:
 			//GUIStatus = "server";
-			GUIStatus = "testServer";
+			//GUIStatus = "testServer";
 			OnServer();
 			break;
 		case NetworkPeerType.Client:
 			//GUIStatus = "client";
-			GUIStatus = "testClient";
+			//GUIStatus = "testClient";
 			OnClient();
 			break;
 		case NetworkPeerType.Connecting:
-			GUIStatus = "connecting";
+			//GUIStatus = "connecting";
 			break;
 		}
-		Debug.Log ("====> Connection number: " + Network.connections.Length);
-		Debug.Log ("====> network peertype: " + Network.peerType.ToString()); 
 	}
 
 	////************************* client part callback function ***********************************
@@ -423,11 +306,120 @@ public class myConnection : MonoBehaviour {
 
 	IEnumerator WaitAndPrint(float waitTime){
 		// pause execution for waitTime seconds
-		print ("----> coroutine Waiting ... ");
+		Debug.Log ("----> coroutine Waiting ... ");
 		yield return new WaitForSeconds(waitTime);
 		if(!found && !connected){
 			StopBrowsing();
 			PublishService();
 		}
 	}
+
+	/*
+	//define the GUI
+	void OnGUI(){
+		//indicate the status of connection: searching -> waiting -> done -> stop
+
+		//label display connection status
+		GUILayout.Label (statusLabel, labelStyle);
+
+		//main UI depend on value of GUIStatus
+		switch (GUIStatus) {
+		case "start":
+			ResetMessage(); //reset all message each time before establish a connection
+
+			if(GUILayout.Button("Start") && !broStatus){
+				//start to match a service for player depends on service type and name
+				StartMatch(); 
+			}
+			break;
+		case "client":
+			GUILayout.Label("Connected server: ["+ foundServiceName + "]");
+			if (GUILayout.Button ("Disconnect") && Network.peerType == NetworkPeerType.Client) {
+				StopConnection();
+			}
+
+			//send and receive message from connected peer through unity RPC
+			GUILayout.Box(recMessage);	
+			sendMessage = GUILayout.TextArea (sendMessage);
+			if (GUILayout.Button ("Send")) {
+				networkView.RPC ("ReceiveMessage", RPCMode.All, sendMessage);
+			}
+			break;
+		case "server":
+			GUILayout.Label("Server is running: ["+ publishServiceName + "]");
+			if (GUILayout.Button ("Stop Service") && Network.peerType == NetworkPeerType.Server) {
+				Debug.Log("-----> stop service. onserver");
+				StopPublish();
+			}
+			GUILayout.Label("Our Clients:");
+			int length = Network.connections.Length; 
+			for(int i=0; i<length; i++) {
+				GUILayout.Label ("Client" + i);
+				GUILayout.Label ("Client IP" + Network.connections [i].ipAddress);  
+				GUILayout.Label ("Client Port" + Network.connections [i].port);
+				GUILayout.Label ("------------------------------------------------");
+			}
+	
+			//send and receive message from connected peer through unity RPC
+			GUILayout.Box(recMessage);
+			sendMessage = GUILayout.TextArea (sendMessage);
+			if (GUILayout.Button ("Send")) {
+				networkView.RPC ("ReceiveMessage", RPCMode.All, sendMessage);
+			}
+			break;
+		case "connecting":
+			GUILayout.Label("Connectiong, please waiting ...");
+			break;
+		case "browsing":
+			if( GUILayout.Button ("Stop Browsing") ){
+				justStop = true;
+				StopBrowsing();
+				Debug.Log("----> GUIStatus: browsing ... ");
+			}
+			break;
+		//========= for unity connection test ============================================
+		case "testStart":
+			string thisIP = Network.player.ipAddress;
+			int thisPort = 10000;
+			if (GUILayout.Button ("Start web server")) {
+				thisIP = MultiManager.initializethisdevice(publishServiceName);
+			}
+			if (GUILayout.Button ("Start web client")) {
+				NetworkConnectionError error = Network.Connect (thisIP, thisPort);
+				switch(error){
+				case NetworkConnectionError.NoError:
+					Debug.Log("connect server successfully");
+					break;
+				default:
+					Debug.Log("Client Connecting Status:"+error);
+					break;
+				}
+			}
+			break;
+		case "testClient":
+			GUILayout.Label("ip: " + Network.player.ipAddress);
+			GUILayout.Label("port: " + Network.player.port);
+			GUILayout.Label("external port: " + Network.player.externalPort);
+			playButton.SetActive(true);
+			break;
+		case "testServer":
+			GUILayout.Label("ip: " + Network.player.ipAddress);
+			GUILayout.Label("port: " + Network.player.port);
+			GUILayout.Label("external port: " + Network.player.externalPort);
+			int len = Network.connections.Length; 
+			GUILayout.Label("Our Clients:");
+			for(int i=0; i<len; i++) {
+				GUILayout.Label ("Client" + i);
+				GUILayout.Label ("Client IP" + Network.connections [i].ipAddress);  
+				GUILayout.Label ("Client Port" + Network.connections [i].port);
+				GUILayout.Label ("----------------------------------------------");
+			}
+			if( len > 0 ){
+				playButton.SetActive(true);
+			}
+			break;
+		//================================================================================
+		}
+	}
+	*/
 }

@@ -47,13 +47,13 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	float highlightTimer = 0;
 	
-	float scoreHighlightTimer = 0;
+	float[] scoreHighlightTimer = new float[10];
 	
 	public float dirInterval = 5;       //每隔5秒改变一次隧道方向
 	
 	public float highlightInterval = 4; //Change highlight tracks
 	
-	//public Queue<float> highlightIntervalQueue = new Queue<float>(); 
+	public Queue<float> highlightIntervalQueue = new Queue<float>(); 
 	
 	public float currentSpeed = 80;     //当前隧道移动速度
 	
@@ -124,8 +124,7 @@ public class MultiMainLogic : MonoBehaviour {
 	//multiPlayer
 	GameObject player_op;                  //opponent's aircraft
 	string playerName_op;
-
-	public GameObject comboUI_op;          //连击UI
+	
 	public UILabel playerNameUI;
 	public UISlider hpUI_op;               //HP进度条	       	
 	public UISlider energyUI_op;           //Energy进度条
@@ -143,6 +142,10 @@ public class MultiMainLogic : MonoBehaviour {
 	bool opStop = false;
 
 	RPCLogicHandler _rpcHandler;
+
+	public int index = 0;
+	public int indexFollow = 0;
+	public Queue<float> dirIntervalQueue = new Queue<float>(); 
 
 	// Use this for initialization
 	void Start () {
@@ -173,7 +176,8 @@ public class MultiMainLogic : MonoBehaviour {
 		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
-		//highlightIntervalQueue =  dm.beatList;
+		highlightIntervalQueue =  dm.beatList;
+		dirIntervalQueue = dm.beatList;
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -227,7 +231,10 @@ public class MultiMainLogic : MonoBehaviour {
 		timer += Time.deltaTime;        //克隆隧道计时器 + 距上次Update函数到此次Update函数所流逝的时间
 		dirTimer += Time.deltaTime;     //改变隧道扭曲方向的计时器 + 同时
 		highlightTimer += Time.deltaTime; 
-		scoreHighlightTimer += Time.deltaTime;
+
+		for (int i = 0; i < 10; i++) {
+			scoreHighlightTimer[i] += Time.deltaTime;
+		}
 		
 		
 		GenerateEnviroment ();
@@ -235,11 +242,6 @@ public class MultiMainLogic : MonoBehaviour {
 		CheckFever ();
 
 		tunnelOffset += Time.deltaTime * currentSpeed;
-
-		//if (Network.peerType == NetworkPeerType.Server) {
-		//	networkConnections = Network.connections.Length;
-		//}
-
 
 		if (Network.peerType == NetworkPeerType.Client || Network.peerType == NetworkPeerType.Server) {
 			Debug.Log("Network connected.!!!!! going to send message");
@@ -335,8 +337,8 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	void CheckHp ()
 	{
-		//if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
-		if( hpUI.value <= 0 )
+		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
+		//if( hpUI.value <= 0 )
 		{
 			failUI.SetActive(true);
 			finalScoreUI.text = "Your Score: " + ((int)score).ToString();
@@ -369,7 +371,7 @@ public class MultiMainLogic : MonoBehaviour {
 			testObject["score"] = score;
 			testObject.SaveAsync();
 			
-//			networkView.RPC ("ProccessFailUI", RPCMode.Others, true, score);
+			//networkView.RPC ("ProccessFailUI", RPCMode.Others, true, score);
 			_rpcHandler.SendProccessFailUI(true, score);
 			player.SetActive(false);
 			player_op.SetActive(false);
@@ -410,7 +412,6 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	void CloneTunnel (GameObject element)
 	{
-		
 		if (timer > interval)   //当克隆隧道计时器大于克隆隧道的间隔时间，则克隆一个隧道
 		{
 			current = Instantiate(element) as GameObject; //克隆体保存在current此变量里
@@ -419,14 +420,13 @@ public class MultiMainLogic : MonoBehaviour {
 			timer = 0;      //计时器复位
 		}
 		
-		if (dirTimer > dirInterval) //同上，改变扭曲方向
+		if (dirTimer > dirIntervalQueue.Peek()) //同上，改变扭曲方向
 		{
 			dirTimer = 0;
-			ChangeDir(dirInterval-0.5f, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			
+			ChangeDir(dirIntervalQueue.Dequeue(), new Vector3(Random.Range(-10, 10), Random.Range(-1, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
-
-		//=======for multi test
-		/*
+		
 		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
 		{
 			highlightIntervalQueue.Dequeue();
@@ -441,37 +441,23 @@ public class MultiMainLogic : MonoBehaviour {
 			else if (nextHighlight < 0) nextHighlight = 9;
 			
 			highlight.Enqueue(nextHighlight);
-			scoreHighlightTimer = 0; 
-			//ChangeHighlight(nextHighlight-nextDir);   //同时改变轨道的高亮
-		}*/
-
-		if ( highlightTimer != 0.0f ) // Change highlight
-		{
-			highlightTimer = 0;
-			System.Random rd = new System.Random();
-			nextDir = rd.Next(0,5)-2;
-			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
-			//Debug.Log (nextDir);
+			scoreHighlightTimer[index] = 0; 
 			
-			nextHighlight = (nextHighlight - nextDir);
-			if (nextHighlight > 9) nextHighlight = 0;
-			else if (nextHighlight < 0) nextHighlight = 9;
+			index++; 
+			if(index > 9) index = 0;
 			
-			highlight.Enqueue(nextHighlight);
-			scoreHighlightTimer = 0; 
 			//ChangeHighlight(nextHighlight-nextDir);   //同时改变轨道的高亮
 		}
-		//=========================
-
-		if (scoreHighlightTimer > highlightChangeInterval)
+		
+		if (scoreHighlightTimer[indexFollow] > highlightChangeInterval)
 		{
-			scoreHighlightTimer = -10000f;
+			scoreHighlightTimer[indexFollow] = -10000f;
 			currentHighlight = (int)highlight.Dequeue();
+			Debug.Log("here" + currentHighlight);
 			
-			
+			indexFollow++;
+			if(indexFollow > 9) indexFollow = 0;	
 		}
-		
-		
 	}
 	
 	

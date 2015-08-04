@@ -12,14 +12,18 @@ public class RPCLogicHandler : MonoBehaviour
 	private bool _networkFail;
 	private bool _opponentNetworkFail;
 
+	public bool _musicSet;
+	public bool _opponentMusicSet;
+
 	private MultiMainLogic _mainLogic;
 
 	GameObject playButton;
-
+	GameObject selectButton;
 
 	void Awake()
 	{
 		playButton = GameObject.Find("MultiPlayStart");
+		selectButton = GameObject.Find ("MultiSelectMusic");
 		DontDestroyOnLoad (this);
 	}
 
@@ -35,6 +39,17 @@ public class RPCLogicHandler : MonoBehaviour
 		_mainLogic = logic;
 		_sceneLoaded = true;
 		networkView.RPC ("OnGameSceneLoaded", RPCMode.Others, null);
+	}
+
+	public void SetMusic(){
+		//select Music UI
+		//if music setted
+		myConnection.musicSet = true;
+		_musicSet = true;
+		networkView.RPC ("OnMusicReady", RPCMode.Others, null);
+		if (_opponentMusicSet) {
+			playButton.SetActive(true);
+		}
 	}
 
 	public void SendReady()
@@ -83,6 +98,15 @@ public class RPCLogicHandler : MonoBehaviour
 		if (_ready) {
 			// Go to game scene.
 			GoToGameScene();
+		}
+	}
+
+	[RPC]
+	void OnMusicReady()
+	{
+		_opponentMusicSet = true;
+		if(_musicSet){
+			playButton.SetActive(true);
 		}
 	}
 

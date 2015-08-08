@@ -42,16 +42,17 @@ public class RPCLogicHandler : MonoBehaviour
 		networkView.RPC ("OnGameSceneLoaded", RPCMode.Others, null);
 	}
 
-	public int SelectMusic(){
+	public void SelectMusic(){
 		//assume return the music ID
+		//set the id to MusicId
+		SetMusic (MusicId);
 	}
 
-	public void SetMusic(){
-		//select Music UI
-		//if music setted
-		MusicId = SelectMusic ();
+	public void SetMusic(int id){
+		//set music with the id
 		myConnection.musicSet = true;
 		_musicSet = true;
+
 		networkView.RPC ("OnMusicReady", RPCMode.Others, MusicId);
 		if (_opponentMusicSet) {
 			playButton.SetActive(true);
@@ -111,8 +112,13 @@ public class RPCLogicHandler : MonoBehaviour
 	void OnMusicReady(int _music)
 	{
 		_opponentMusicSet = true;
-		MusicId = _music;
+
+		if (!_musicSet) {
+			SetMusic (_music);
+		}
+
 		//set music analysis result file
+
 		if(_musicSet){
 			playButton.SetActive(true);
 		}

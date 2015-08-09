@@ -63,12 +63,16 @@ public class UIEvents : MonoBehaviour {
 	public void OnMultiClick()
 	{
 		multiMode = true;
+		DataManager dm = DataManager.Instance;
+		dm.isMultiPlayerMode = true;
 		Application.LoadLevel ("MultiConnection");
 	}
 	
 	public void OnSingleClick() 
 	{
 		multiMode = false;
+		DataManager dm = DataManager.Instance;
+		dm.isMultiPlayerMode = false;
 		Application.LoadLevel ("MusicChooser");
 	}
 }

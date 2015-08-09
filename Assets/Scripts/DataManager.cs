@@ -17,6 +17,7 @@ public class DataManager
 	public Queue<float> onsetList = null;
 	public Queue<float> melodyList = null;
 	public string musicPath = null;
+	public bool isMultiPlayerMode=false;
 
 	public static string HARD="Hard";
 	public static string MEDIUM="Medium";

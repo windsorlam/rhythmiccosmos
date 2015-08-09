@@ -33,15 +33,24 @@ public class Analyzer
 		DataManager dm=DataManager.Instance;
 		dm.progress = 0f;
 		string dir= Environment.CurrentDirectory;
-		Process.Start (dir+"/Assets/Algorithm/streaming_predominantmelody", "'"+musicPath+"' melody.yaml");
-		Process.Start (dir+"/Assets/Algorithm/streaming_extractor", "'"+musicPath+"' rhythm.yaml");
-		while (true) {
-			Process[] pmelody=Process.GetProcessesByName("streaming_extra");
-			for(int i=0;i<300;i++)dm.progress+=0.01f;
-			Process[] prhythm=Process.GetProcessesByName("streaming_predo");
-			for(int i=0;i<300;i++)dm.progress+=0.01f;
-			if(pmelody.Length==0&&prhythm.Length==0){
-				break;
+		string melodyPath = "melody.yaml";
+		string rhythmPath = "rhythm.yaml";
+		if (dm.isMultiPlayerMode) {
+			melodyPath="Assets/Algorithm/"+dm.musicPath+" - melody.yaml";
+			rhythmPath="Assets/Algorithm/"+dm.musicPath+" - rhythm.yaml";
+		} else {
+			Process.Start ("Assets/Algorithm/streaming_predominantmelody", "'" + musicPath + "' Assets/Algorithm/melody.yaml");
+			Process.Start ("Assets/Algorithm/streaming_extractor", "'" + musicPath + "' Assets/Algorithm/rhythm.yaml");
+			while (true) {
+				Process[] pmelody = Process.GetProcessesByName ("streaming_extra");
+				for (int i=0; i<300; i++)
+					dm.progress += 0.01f;
+				Process[] prhythm = Process.GetProcessesByName ("streaming_predo");
+				for (int i=0; i<300; i++)
+					dm.progress += 0.01f;
+				if (pmelody.Length == 0 && prhythm.Length == 0) {
+					break;
+				}
 			}
 		}
 		for (; dm.progress<90; dm.progress+=0.01f)
@@ -51,9 +60,9 @@ public class Analyzer
 			/**
 			 * Parsing melody.yaml
 			 */
-			FileStream fs1 = new FileStream ("melody.yaml", FileMode.Open);
+			FileStream fs1 = new FileStream (melodyPath, FileMode.Open);
 			StreamReader sr1 = new StreamReader (fs1);
-			FileStream fs2=new FileStream("rhythm.yaml",FileMode.Open);
+			FileStream fs2=new FileStream(rhythmPath,FileMode.Open);
 			StreamReader sr2=new StreamReader(fs2);
 			long fileSize=fs1.Length+fs2.Length;
 			string line;
@@ -93,7 +102,6 @@ public class Analyzer
 			/**
 			 * Parsing rhythm.yaml
 			 */
-
 			Queue<float> beatList=new Queue<float>();
 			Queue<float> onsetList=new Queue<float>();
 			while ((line=sr2.ReadLine())!=null){

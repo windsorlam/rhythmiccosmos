@@ -39,8 +39,8 @@ public class Analyzer
 			melodyPath="Assets/Algorithm/"+dm.musicPath+" - melody.yaml";
 			rhythmPath="Assets/Algorithm/"+dm.musicPath+" - rhythm.yaml";
 		} else {
-			Process.Start ("Assets/Algorithm/streaming_predominantmelody", "'" + musicPath + "' Assets/Algorithm/melody.yaml");
-			Process.Start ("Assets/Algorithm/streaming_extractor", "'" + musicPath + "' Assets/Algorithm/rhythm.yaml");
+			Process.Start ("Assets/Algorithm/streaming_predominantmelody", "'" + musicPath + "' melody.yaml");
+			Process.Start ("Assets/Algorithm/streaming_extractor", "'" + musicPath + "' rhythm.yaml");
 			while (true) {
 				Process[] pmelody = Process.GetProcessesByName ("streaming_extra");
 				for (int i=0; i<300; i++)

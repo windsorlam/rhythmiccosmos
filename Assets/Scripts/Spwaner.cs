@@ -24,7 +24,7 @@ public class Spwaner :  MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-		if(UIEvents.multiMode == true) {
+		if (UIEvents.multiMode || UIEvents.multiInternet) {
 			speed = multiLogic.currentSpeed;
 		} else {
 			speed = logic.currentSpeed;
@@ -35,7 +35,7 @@ public class Spwaner :  MonoBehaviour
         {
 			haloIntervalQueue.Dequeue();
             timer = 0;
-			if(UIEvents.multiMode == true) {
+			if(UIEvents.multiMode == true || UIEvents.multiInternet) {
 				current = multiLogic.nextHighlight;
 			} else {
 				current = logic.nextHighlight;

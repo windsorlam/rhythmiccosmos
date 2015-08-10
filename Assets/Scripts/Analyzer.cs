@@ -9,7 +9,7 @@
 // ------------------------------------------------------------------------------
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 
 
@@ -66,7 +66,7 @@ public class Analyzer
 			StreamReader sr2=new StreamReader(fs2);
 			long fileSize=fs1.Length+fs2.Length;
 			string line;
-			Queue<float> melodyList = new Queue<float>();
+			ArrayList melodyList = new ArrayList();
 			//Console.WriteLine(list[0]);
 			int i;
 			while ((line=sr1.ReadLine())!=null) {
@@ -89,7 +89,7 @@ public class Analyzer
 						time = Analyzer.LENGTH * i;
 						//Console.WriteLine(time+":"+frequency);
 						if(time-lasttime>0.2){
-							melodyList.Enqueue ((float)(time-lasttime));
+							melodyList.Add((float)(time-lasttime));
 							lasttime=time;
 						}
 					}
@@ -102,8 +102,8 @@ public class Analyzer
 			/**
 			 * Parsing rhythm.yaml
 			 */
-			Queue<float> beatList=new Queue<float>();
-			Queue<float> onsetList=new Queue<float>();
+			ArrayList beatList=new ArrayList();
+			ArrayList onsetList=new ArrayList();
 			while ((line=sr2.ReadLine())!=null){
 				dm.progress+=(float)line.Length*20f/(float)fileSize;
 				if(line.Contains("beats_position")){
@@ -115,7 +115,7 @@ public class Analyzer
 						double interval=time-lasttime;
 						if(interval<2.2)
 							continue;
-						beatList.Enqueue((float)(interval));
+						beatList.Add((float)(interval));
 						lasttime=time;
 					}
 					Console.WriteLine(i+" "+lasttime+" "+time);
@@ -127,7 +127,7 @@ public class Analyzer
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						onsetList.Enqueue((float)(interval));
+						onsetList.Add((float)(interval));
 						lasttime=time;
 					}
 					controlsPerSec+=onsetList.Count/time;

@@ -15,9 +15,18 @@ public class ConnectToServer : MonoBehaviour {
 	private static bool networkFail;
 	private static bool opponentNetworkFail;
 
+	private static bool musicSet;
+	private static bool opponentMusicSet;
+
 	private MultiMainLogic _mainLogic;
 
 	GameObject playButton;
+	GameObject selectButton;
+	GameObject musiclist;
+	private string music;
+	DataManager dm;
+	private bool musicSelected;
+
 	// Use this for initialization
 	void Awake(){
 		Debug.Log ("----> [Awake] Start to connect ... ");
@@ -30,7 +39,11 @@ public class ConnectToServer : MonoBehaviour {
 		m_websocket.Connect ("https://shared.staging.mossapi.com/connect");
 
 		playButton = GameObject.Find("MultiPlayStart");
-		//playButton.SetActive (false);
+		selectButton = GameObject.Find ("MultiSelectMusic");
+		musiclist = GameObject.Find ("MusicList");
+		playButton.SetActive (false);
+
+		dm = DataManager.Instance;
 
 		DontDestroyOnLoad (this);
 	}
@@ -54,7 +67,7 @@ public class ConnectToServer : MonoBehaviour {
 		case "Connected":
 			opponentNetworkReady = true;
 			if(networkReady){
-				playButton.SetActive (true);
+				selectButton.SetActive (true);
 			}
 			break;
 		case "playReady":
@@ -74,6 +87,11 @@ public class ConnectToServer : MonoBehaviour {
 			break;
 		case "Disconnected":
 			opponentNetworkFail = true;
+			break;
+		case "setMusic":
+			opponentMusicSet = true;
+			string music = message["Music"].str;
+			SetMusic(music);
 			break;
 		}
 	}
@@ -99,12 +117,16 @@ public class ConnectToServer : MonoBehaviour {
 		m_websocket.Send(obj.ToString());
 
 		if (opponentNetworkReady) {
-			playButton.SetActive (true);
+			selectButton.SetActive (true);
 		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (dm.musicPath != null && !musicSelected) {
+			SetMusic(dm.musicPath);
+			musicSelected = true;
+		}
 	}
 
 	public static bool isGameReady(){
@@ -122,6 +144,26 @@ public class ConnectToServer : MonoBehaviour {
 		obj.AddField ("test", "for send test");
 
 		m_websocket.Send(obj.ToString());
+	}
+
+	public void OnSelectMusic(){
+		musiclist.gameObject.SetActive (true);
+	}
+
+	public void SetMusic(string music){
+		//set music with the id
+		if (!musicSet) {
+			musicSet = true;
+			dm.musicPath = music;
+
+			JSONObject obj = new JSONObject ();
+			obj.AddField ("header", "setMusic");
+			obj.AddField ("Music", music);
+			m_websocket.Send (obj.ToString());
+		}
+		if (opponentMusicSet) {
+			playButton.SetActive(true);
+		}
 	}
 
 	public void OnPlayReady(){

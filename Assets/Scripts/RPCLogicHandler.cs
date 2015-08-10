@@ -19,20 +19,27 @@ public class RPCLogicHandler : MonoBehaviour
 
 	GameObject playButton;
 	GameObject selectButton;
+	GameObject musiclist;
 	private string music;
+	DataManager dm;
+	private bool musicSelected;
 
 	void Awake()
 	{
 		playButton = GameObject.Find("MultiPlayStart");
 		selectButton = GameObject.Find ("MultiSelectMusic");
+		musiclist = GameObject.Find ("MusicList");
+
 		DontDestroyOnLoad (this);
+		
+		dm = DataManager.Instance;
 	}
 
 	void Update()
 	{
-		DataManager dm = DataManager.Instance;
-		if (dm.musicPath != null) {
+		if (dm.musicPath != null && !musicSelected) {
 			SetMusic(dm.musicPath);
+			musicSelected = true;
 		}
 	}
 
@@ -51,7 +58,6 @@ public class RPCLogicHandler : MonoBehaviour
 	}
 
 	public void SelectMusic(){
-		GameObject musiclist = GameObject.Find ("MusicList");
 		musiclist.SetActive (true);
 	}
 

@@ -78,6 +78,8 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnWANClick(){
 		multiInternet = true;
+		DataManager dm = DataManager.Instance;
+		dm.isMultiPlayerMode = true;
 		Application.LoadLevel ("InternetConnection");
 	}
 	

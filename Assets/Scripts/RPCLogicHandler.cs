@@ -23,6 +23,7 @@ public class RPCLogicHandler : MonoBehaviour
 	private string music;
 	DataManager dm;
 	private bool musicSelected;
+	public bool analysisFinished;
 
 	void Awake()
 	{
@@ -38,8 +39,12 @@ public class RPCLogicHandler : MonoBehaviour
 	void Update()
 	{
 		if (dm.musicPath != null && !musicSelected) {
-			SetMusic(dm.musicPath);
+			SendMusicPath(dm.musicPath);
 			musicSelected = true;
+		}
+		if ( musicSelected && analysisFinished) {
+			sendMusicReady();
+			analysisFinished = false; // only send once
 		}
 	}
 
@@ -61,14 +66,16 @@ public class RPCLogicHandler : MonoBehaviour
 		musiclist.SetActive (true);
 	}
 
-	public void SetMusic(string music){
-		//set music with the id
+	public void SendMusicPath(string music){
+		networkView.RPC ("OnMusicSelected", RPCMode.Others, music);
+	}
+
+	public void sendMusicReady(){
+		//OnMusicReady
 		myConnection.musicSet = true;
 		_musicSet = true;
 
-		DataManager dm = DataManager.Instance;
-		dm.musicPath = music;
-		networkView.RPC ("OnMusicReady", RPCMode.Others, music);
+		networkView.RPC ("OnMusicReady", RPCMode.Others);
 		if (_opponentMusicSet) {
 			playButton.SetActive(true);
 		}
@@ -124,16 +131,17 @@ public class RPCLogicHandler : MonoBehaviour
 	}
 
 	[RPC]
-	void OnMusicReady(string _music)
+	void OnMusicSelected(string _music)
 	{
+		musicSelected = true;
+
+		DataManager dm = DataManager.Instance;
+		dm.musicPath = music;
+	}
+
+	[RPC]
+	void OnMusicReady(){
 		_opponentMusicSet = true;
-
-		if (!_musicSet) {
-			SetMusic (_music);
-		}
-
-		//set music analysis result file
-
 		if(_musicSet){
 			playButton.SetActive(true);
 		}

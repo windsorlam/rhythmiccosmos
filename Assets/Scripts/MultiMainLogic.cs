@@ -168,9 +168,12 @@ public class MultiMainLogic : MonoBehaviour {
 		
 		player_op = GameObject.FindGameObjectWithTag ("Player_op");  //find opponent's aircraft
 		player_op.gameObject.SetActive (false);
-		
+
 		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
-		_rpcHandler.SetSceneLoaded (this);
+
+		if (UIEvents.multiMode) {
+			_rpcHandler.SetSceneLoaded (this);
+		}
 		
 		score = 0;
 		hp = hpUI.value;
@@ -219,6 +222,7 @@ public class MultiMainLogic : MonoBehaviour {
 	void Update () {
 
 		if(!_rpcHandler.isGameReadyToPlay()) return;
+		if (!ConnectToServer.isGameReady ()) return;
 
 		CheckHp ();    //get current HP value
 		
@@ -251,6 +255,14 @@ public class MultiMainLogic : MonoBehaviour {
 
 		if (Network.peerType == NetworkPeerType.Disconnected || Network.connections.Length <= 0 ) {
 			//_rpcHandler.SendNetworkFailUI();
+			NetworkFailUI.SetActive(true);
+		}
+
+		if (UIEvents.multiInternet) {
+			ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
+		}
+
+		if (ConnectToServer.isNetworkFail()) {
 			NetworkFailUI.SetActive(true);
 		}
 	} 

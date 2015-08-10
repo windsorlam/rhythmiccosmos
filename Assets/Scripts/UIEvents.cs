@@ -5,6 +5,7 @@ using System.Collections;
 
 public class UIEvents : MonoBehaviour {
 	public static bool multiMode = false;
+	public static bool multiInternet = false;
 	// Use this for initialization
 	void Start () {
 
@@ -18,9 +19,11 @@ public class UIEvents : MonoBehaviour {
 	public void OnRestartClick()
 	{
 		if (multiMode) {
-			Destroy(GameObject.Find("RPCLogicHandler"));
+			Destroy (GameObject.Find ("RPCLogicHandler"));
 			Application.LoadLevel ("MultiConnection");
-		} else {
+		} else if (multiInternet) {
+			Application.LoadLevel ("InternetConnection");
+		}else {
 			Application.LoadLevel("Space");
 		}
 	}
@@ -42,6 +45,7 @@ public class UIEvents : MonoBehaviour {
 			Destroy(GameObject.Find("RPCLogicHandler"));
 			multiMode = false;
 		}
+		multiInternet = false;
         Application.LoadLevel("Main");
     }
 
@@ -62,13 +66,23 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnMultiClick()
 	{
+		Application.LoadLevel ("ConnectionMethodChooser");
+	}
+
+	public void OnLANClick(){
 		multiMode = true;
 		Application.LoadLevel ("MultiConnection");
+	}
+
+	public void OnWANClick(){
+		multiInternet = true;
+		Application.LoadLevel ("InternetConnection");
 	}
 	
 	public void OnSingleClick() 
 	{
 		multiMode = false;
+		multiInternet = false;
 		Application.LoadLevel ("MusicChooser");
 	}
 }

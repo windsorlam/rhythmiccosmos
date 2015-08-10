@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using System.IO;
 
 public class testFileBrowser : MonoBehaviour {
 	//skins and textures
@@ -12,9 +13,14 @@ public class testFileBrowser : MonoBehaviour {
 	
 //	string[] layoutTypes = {"Type 0","Type 1"};
 	//initialize file browser
-	FileBrowser fb = new FileBrowser();
+
+	DataManager dm=DataManager.Instance;
+
+	FileBrowser fb ;
 	// Use this for initialization
 	void Start () {
+		fb=new FileBrowser(dm.isMultiPlayerMode);
+		
 		//setup file browser style
 		fb.guiSkin = skin; //set the starting skin
 		//set the various textures
@@ -59,8 +65,12 @@ public class testFileBrowser : MonoBehaviour {
 			}else{
 				slider.SetActive (true);
 				string path=fb.outputFile.ToString();
-				DataManager dm=DataManager.Instance;
-				dm.musicPath=path;
+				if(dm.isMultiPlayerMode){
+					FileInfo file=fb.outputFile;
+					dm.musicPath=file.Name;
+				}else{
+					dm.musicPath=path;
+				}
 			}
 		}
 

@@ -24,8 +24,10 @@ public class ProgressBar : MonoBehaviour {
 		progressBar.value=dm.progress;
 		if (analysisFinished) {
 			aDelegate.EndInvoke(ar);
-			if( UIEvents.multiMode ){
-				Application.LoadLevel("MultiSpace");
+			if( dm.isMultiPlayerMode ){
+				GameObject start=GameObject.Find("MultiPlayStart");
+				start.SetActive(true);
+				//Application.LoadLevel("MultiSpace");
 			}else{
 				Application.LoadLevel("Space");
 			}

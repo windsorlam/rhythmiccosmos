@@ -71,6 +71,8 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnLANClick(){
 		multiMode = true;
+		DataManager dm = DataManager.Instance;
+		dm.isMultiPlayerMode = true;
 		Application.LoadLevel ("MultiConnection");
 	}
 
@@ -83,6 +85,9 @@ public class UIEvents : MonoBehaviour {
 	{
 		multiMode = false;
 		multiInternet = false;
+
+		DataManager dm = DataManager.Instance;
+		dm.isMultiPlayerMode = false;
 		Application.LoadLevel ("MusicChooser");
 	}
 }

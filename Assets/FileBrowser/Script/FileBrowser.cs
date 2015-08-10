@@ -48,19 +48,26 @@ public class FileBrowser{
 	#if thread
 	protected Thread t;
 	#endif
+
+	protected bool isMultiPlayerMode=false;
 	
 	//Constructors
 	public FileBrowser(string directory,int layoutStyle,Rect guiRect){	currentDirectory = new DirectoryInfo(directory);	layout = layoutStyle;	guiSize = guiRect;	}
 	#if (UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY || UNITY_WP8)
 		public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
-		public FileBrowser(string directory):this(directory,1){}
+	public FileBrowser(string directory,bool isMultiPlayerMode):this(directory,1){
+		this.isMultiPlayerMode = isMultiPlayerMode;
+		if (!isMultiPlayerMode)
+			showDrives = false;
+	}
 	#else
 		public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(Screen.width*0.125f,Screen.height*0.125f,Screen.width*0.75f,Screen.height*0.75f)){}
 		public FileBrowser(string directory):this(directory,0){}
 	#endif
 	public FileBrowser(Rect guiRect):this(){	guiSize = guiRect;	}
 	public FileBrowser(int layoutStyle):this(Directory.GetCurrentDirectory(),layoutStyle){}
-	public FileBrowser():this(Directory.GetCurrentDirectory()){}
+	public FileBrowser(bool isMultiPlayerMode):this(Directory.GetCurrentDirectory(),isMultiPlayerMode){}
+	public FileBrowser():this(Directory.GetCurrentDirectory(),false){}
 	
 	//set variables
 	public void setDirectory(string dir){	currentDirectory=new DirectoryInfo(dir);	}
@@ -98,12 +105,14 @@ public class FileBrowser{
 							foreach(DirectoryInformation di in drives){
 								if(di.button()){	getFileList(di.di);	}
 							}
-						}else{
+						}else if(!isMultiPlayerMode){
 							if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
 								getFileList(parentDir.di);
 						}
-						foreach(DirectoryInformation di in directories){
-							if(di.button()){	getFileList(di.di);	}
+						if(!isMultiPlayerMode){
+							foreach(DirectoryInformation di in directories){
+								if(di.button()){	getFileList(di.di);	}
+							}
 						}
 						GUILayout.EndScrollView();
 					GUILayout.EndVertical();
@@ -160,14 +169,15 @@ public class FileBrowser{
 							if(di.button()){	getFileList(di.di);	}
 						}
 						GUILayout.EndHorizontal();
-					}else{
+					}else if(!isMultiPlayerMode){
 						if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
 							getFileList(parentDir.di);
 					}
 					
-					
-					foreach(DirectoryInformation di in directories){
-						if(di.button()){	getFileList(di.di);	}
+					if(!isMultiPlayerMode){
+						foreach(DirectoryInformation di in directories){
+							if(di.button()){	getFileList(di.di);	}
+						}
 					}
 					for(int fi=0;fi<files.Length;fi++){
 						if(selectedFile==fi){
@@ -259,15 +269,16 @@ public class FileBrowser{
 		}
 		
 		//get directories
-		DirectoryInfo[] dia = di.GetDirectories ();
-		directories = new DirectoryInformation[dia.Length];
-		for (int d=0; d<dia.Length; d++) {
-			if (directoryTexture)
-				directories [d] = new DirectoryInformation (dia [d], directoryTexture);
-			else
-				directories [d] = new DirectoryInformation (dia [d]);
+		if (!isMultiPlayerMode) {
+			DirectoryInfo[] dia = di.GetDirectories ();
+			directories = new DirectoryInformation[dia.Length];
+			for (int d=0; d<dia.Length; d++) {
+				if (directoryTexture)
+					directories [d] = new DirectoryInformation (dia [d], directoryTexture);
+				else
+					directories [d] = new DirectoryInformation (dia [d]);
+			}
 		}
-		
 		//get files
 		FileInfo[] fia = di.GetFiles (searchPattern);
 		//FileInfo[] fia = searchDirectory(di,searchPattern);
@@ -290,7 +301,7 @@ public class FileBrowser{
 	}
 
 	private bool isMusicFile(FileInfo file){
-		string[] suffixes = {"wav","mp3","ogg","flac","ape","wma","aac","aiff","midi","rm","ra","rmx","au","vqf","amr"};
+		string[] suffixes = {"wav","mp3","ogg","flac","aiff"};
 		string name = file.Name;
 		bool isMusic = false;
 		foreach (string suffix in suffixes) {

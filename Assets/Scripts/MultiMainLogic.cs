@@ -53,7 +53,8 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	public float highlightInterval = 4; //Change highlight tracks
 	
-	public Queue<float> highlightIntervalQueue = new Queue<float>(); 
+	public ArrayList highlightIntervalList = new ArrayList(); 
+	int highlightIntervalIndex = 0;
 	
 	public float currentSpeed = 80;     //当前隧道移动速度
 	
@@ -145,7 +146,8 @@ public class MultiMainLogic : MonoBehaviour {
 
 	public int index = 0;
 	public int indexFollow = 0;
-	public Queue<float> dirIntervalQueue = new Queue<float>(); 
+	public ArrayList dirIntervalList = new ArrayList(); 
+	int dirIntervalIndex = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -179,8 +181,8 @@ public class MultiMainLogic : MonoBehaviour {
 		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
-		highlightIntervalQueue =  dm.beatList;
-		dirIntervalQueue = dm.beatList;
+		highlightIntervalList=  dm.beatList;
+		//dirIntervalList = dm.beatList; 
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -349,7 +351,7 @@ public class MultiMainLogic : MonoBehaviour {
 	
 	void CheckHp ()
 	{
-		if (hpUI.value <= 0  || highlightIntervalQueue.Count==1)
+		if (hpUI.value <= 0  || highlightIntervalIndex==highlightIntervalList.Capacity-1)
 		//if( hpUI.value <= 0 )
 		{
 			failUI.SetActive(true);
@@ -432,16 +434,16 @@ public class MultiMainLogic : MonoBehaviour {
 			timer = 0;      //计时器复位
 		}
 		
-		if (dirTimer > dirIntervalQueue.Peek()) //同上，改变扭曲方向
+		if (dirTimer > (float)dirIntervalList[dirIntervalIndex]) //同上，改变扭曲方向
 		{
 			dirTimer = 0;
 			
-			ChangeDir(dirIntervalQueue.Dequeue(), new Vector3(Random.Range(-10, 10), Random.Range(-1, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
+			ChangeDir((float)dirIntervalList[++dirIntervalIndex], new Vector3(Random.Range(-10, 10), Random.Range(-1, 10), Random.Range(-100, 100)));//随机在3个轴上进行扭曲 x:-10-10,y:-10-10,z:-100-100
 		}
 		
-		if (highlightTimer > highlightIntervalQueue.Peek()) // Change highlight
+		if (highlightTimer > (float)highlightIntervalList[highlightIntervalIndex]) // Change highlight
 		{
-			highlightIntervalQueue.Dequeue();
+			highlightIntervalIndex++;
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
 			nextDir = rd.Next(0,5)-2;

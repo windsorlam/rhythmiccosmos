@@ -10,7 +10,8 @@ public class Spwaner :  MonoBehaviour
 
     public GameObject elementPrefab;    // 光晕的预设体
     public Transform t;                 //光晕的克隆体预先设置的位置
-	public Queue<float> haloIntervalQueue = new Queue<float>();  //interval to create halo
+	public ArrayList haloIntervalList = new ArrayList();  //interval to create halo
+	int haloIntervalIndex;
 	public float speed;
 
 	int current;
@@ -19,7 +20,7 @@ public class Spwaner :  MonoBehaviour
 	// Use this for initialization
 	void Start () {
 		DataManager dm=DataManager.Instance;
-		haloIntervalQueue = dm.onsetList;
+		haloIntervalList = dm.onsetList;
 	}
 	
 	// Update is called once per frame
@@ -31,9 +32,9 @@ public class Spwaner :  MonoBehaviour
 		}
 
         timer += Time.deltaTime;
-        if (timer > haloIntervalQueue.Peek())
+        if (timer > (float)haloIntervalList[haloIntervalIndex])
         {
-			haloIntervalQueue.Dequeue();
+			haloIntervalIndex++;
             timer = 0;
 			if(UIEvents.multiMode == true || UIEvents.multiInternet) {
 				current = multiLogic.nextHighlight;

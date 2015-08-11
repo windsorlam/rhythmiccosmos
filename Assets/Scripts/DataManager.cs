@@ -19,9 +19,8 @@ public class DataManager
 	public string musicPath = null;
 	public bool isMultiPlayerMode=false;
 
-	public static byte HARD=3;
-	public static byte MEDIUM=2;
-	public static byte EASY=1;
+	public static byte HARD=1;
+	public static byte EASY=0;
 	
 	private DataManager ()
 	{
@@ -36,20 +35,6 @@ public class DataManager
 
 	public float progress=0.0f;
 	public double difficultyRatio=0.0;
-	private byte difficulty=0;
-	public string Difficulty{
-		get{
-			switch(difficulty){
-			case EASY:return "EASY";
-			case HARD:return "HARD";
-			default:return null;
-			}
-		}
-		set{
-			switch(value){
-			case "EASY":difficulty=EASY;
-			case "HARD":difficulty=HARD;
-			}
-		}
-	}
+	public byte difficulty=0;
+
 }

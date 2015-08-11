@@ -26,10 +26,13 @@ public class Setting : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (sr.value == 1)
+		if (sr.value == 1) {
 			difficulty = 1;
-		else 
+		} else {
 			difficulty = 0;
+		}
+		DataManager dm = DataManager.Instance;
+		dm.difficulty = difficulty;
 	}
 
 

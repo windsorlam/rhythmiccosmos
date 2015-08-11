@@ -23,6 +23,8 @@ public class Analyzer
 		523.3,554.4,587.3,622.3,659.3,698.5,740.0,784.0,830.6,880.0,932.3,987.8,
 		1047,1109,1175,1245,1319,1397,1480,1568,1661,1760,1865,1976,
 		2093,2217,2349,2489,2637,2794,2960,3136,3322,3520,3729,3951,4186};
+	public double beatInterval;
+	public double melodyInterval;
 	
 	public Analyzer ()
 	{
@@ -32,6 +34,14 @@ public class Analyzer
 	{
 		DataManager dm=DataManager.Instance;
 		dm.progress = 0f;
+		switch (dm.difficulty) {
+		case DataManager.EASY:
+			beatInterval=5;
+			melodyInterval=1;
+		case DataManager.HARD:
+			beatInterval=2.2;
+			melodyInterval=0.2;
+		}
 		string dir= Environment.CurrentDirectory;
 		string melodyPath = "melody.yaml";
 		string rhythmPath = "rhythm.yaml";
@@ -88,7 +98,7 @@ public class Analyzer
 						frequency = f;
 						time = Analyzer.LENGTH * i;
 						//Console.WriteLine(time+":"+frequency);
-						if(time-lasttime>0.2){
+						if(time-lasttime>melodyInterval){
 							melodyList.Add((float)(time-lasttime));
 							lasttime=time;
 						}

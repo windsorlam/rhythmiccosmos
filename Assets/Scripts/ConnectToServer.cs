@@ -23,10 +23,11 @@ public class ConnectToServer : MonoBehaviour {
 	GameObject playButton;
 	GameObject selectButton;
 	GameObject musiclist;
+	GameObject slider;
 	private string music;
 	DataManager dm;
 	private bool musicSelected;
-	public bool analysisFinished;
+	public static bool analysisFinished;
 
 	// Use this for initialization
 	void Awake(){
@@ -41,6 +42,7 @@ public class ConnectToServer : MonoBehaviour {
 
 		playButton = GameObject.Find("MultiPlayStart");
 		selectButton = GameObject.Find ("MultiSelectMusic");
+		slider = GameObject.Find ("Slider");
 		musiclist = GameObject.Find ("MusicList");
 		playButton.SetActive (false);
 
@@ -63,6 +65,7 @@ public class ConnectToServer : MonoBehaviour {
 			musicSelected = true;
 		}
 		if ( musicSelected && analysisFinished) {
+			Debug.Log("1111111");
 			sendMusicReady();
 			analysisFinished = false; // only send once
 		}
@@ -167,13 +170,18 @@ public class ConnectToServer : MonoBehaviour {
 		obj.AddField ("header", "musicReady");
 		m_websocket.Send (obj.ToString());
 
-		if (opponentMusicReady) {
+		Debug.Log("2222222222");
+
+		//if (opponentMusicReady) {
 			playButton.SetActive(true);
-		}
+		//}
 	}
 
 	public void OnMusicReady(){
 		opponentMusicReady = true;
+
+		slider.SetActive (true);
+
 		if (musicReady) {
 			playButton.SetActive(true);
 		}
@@ -186,9 +194,9 @@ public class ConnectToServer : MonoBehaviour {
 		obj.AddField ("header", "playReady");
 		m_websocket.Send (obj.ToString());
 	
-		if (opponentPlayReady) {
+		//if (opponentPlayReady) {
 			Application.LoadLevel("MultiSpace");
-		}
+		//}
 	}
 	
 	public static void SendMoveInfo(string playerName, float tunnelOffset, bool boosting, float energy, float hp, float score){

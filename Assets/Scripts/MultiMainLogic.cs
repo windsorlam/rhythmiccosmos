@@ -173,7 +173,7 @@ public class MultiMainLogic : MonoBehaviour {
 
 		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
 
-		if (UIEvents.multiMode) {
+		if (UIEvents.LANorWAN == 1) {
 			_rpcHandler.SetSceneLoaded (this);
 		}
 		
@@ -223,8 +223,11 @@ public class MultiMainLogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if(!_rpcHandler.isGameReadyToPlay()) return;
-		if (!ConnectToServer.isGameReady ()) return;
+		if (UIEvents.LANorWAN == 1) {
+			if(!_rpcHandler.isGameReadyToPlay()) return;
+		} else if (UIEvents.LANorWAN == 2) {
+			if (!ConnectToServer.isGameReady ()) return;
+		}
 
 		CheckHp ();    //get current HP value
 		
@@ -260,7 +263,7 @@ public class MultiMainLogic : MonoBehaviour {
 			NetworkFailUI.SetActive(true);
 		}
 
-		if (UIEvents.multiInternet) {
+		if (UIEvents.LANorWAN == 2) {
 			ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
 		}
 

@@ -5,7 +5,7 @@ using System.Collections;
 
 public class UIEvents : MonoBehaviour {
 	public static bool multiMode = false;
-	public static bool multiInternet = false;
+	public static int LANorWAN; //1 LAN  2 WAN
 	// Use this for initialization
 	void Start () {
 
@@ -19,10 +19,12 @@ public class UIEvents : MonoBehaviour {
 	public void OnRestartClick()
 	{
 		if (multiMode) {
-			Destroy (GameObject.Find ("RPCLogicHandler"));
-			Application.LoadLevel ("MultiConnection");
-		} else if (multiInternet) {
-			Application.LoadLevel ("InternetConnection");
+			if(LANorWAN == 1){
+				Destroy (GameObject.Find ("RPCLogicHandler"));
+				Application.LoadLevel ("MultiConnection");
+				}else if (LANorWAN == 2){
+					Application.LoadLevel ("InternetConnection");
+				}	
 		}else {
 			Application.LoadLevel("Space");
 		}
@@ -42,10 +44,12 @@ public class UIEvents : MonoBehaviour {
     public void OnMainMenu()
     {
 		if (multiMode) {
-			Destroy(GameObject.Find("RPCLogicHandler"));
 			multiMode = false;
+			LANorWAN = 0;
+			if(LANorWAN == 1){
+				Destroy(GameObject.Find("RPCLogicHandler"));
+			}
 		}
-		multiInternet = false;
         Application.LoadLevel("Main");
     }
 
@@ -71,13 +75,15 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnLANClick(){
 		multiMode = true;
+		LANorWAN = 1;
 		DataManager dm = DataManager.Instance;
 		dm.isMultiPlayerMode = true;
 		Application.LoadLevel ("MultiConnection");
 	}
 
 	public void OnWANClick(){
-		multiInternet = true;
+		multiMode = true;
+		LANorWAN = 2;
 		DataManager dm = DataManager.Instance;
 		dm.isMultiPlayerMode = true;
 		Application.LoadLevel ("InternetConnection");
@@ -86,7 +92,7 @@ public class UIEvents : MonoBehaviour {
 	public void OnSingleClick() 
 	{
 		multiMode = false;
-		multiInternet = false;
+		LANorWAN = 0;
 
 		DataManager dm = DataManager.Instance;
 		dm.isMultiPlayerMode = false;

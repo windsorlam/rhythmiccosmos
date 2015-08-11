@@ -138,7 +138,7 @@ public class MainLogic : MonoBehaviour {
 		airCrafts [Setting.planeIndex].SetActive (true);
 
 		DataManager dm=DataManager.Instance;
-		highlightIntervalList=  dm.beatList;
+		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
 
 		//提示轨道偏移
@@ -307,7 +307,7 @@ public class MainLogic : MonoBehaviour {
 			highlightIntervalIndex++;
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
-			nextDir = rd.Next(0,5)-2;
+			nextDir = rd.Next(0,2)-1;
 			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 			//Debug.Log (nextDir);
 			

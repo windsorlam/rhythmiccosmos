@@ -20,6 +20,7 @@ public class RPCLogicHandler : MonoBehaviour
 	GameObject playButton;
 	GameObject selectButton;
 	GameObject musiclist;
+	GameObject slider;
 	private string music;
 	DataManager dm;
 	private bool musicSelected;
@@ -30,7 +31,7 @@ public class RPCLogicHandler : MonoBehaviour
 		playButton = GameObject.Find("MultiPlayStart");
 		selectButton = GameObject.Find ("MultiSelectMusic");
 		musiclist = GameObject.Find ("MusicList");
-
+		slider=GameObject.Find("Slider");
 		DontDestroyOnLoad (this);
 		
 		dm = DataManager.Instance;
@@ -64,6 +65,7 @@ public class RPCLogicHandler : MonoBehaviour
 
 	public void OnSelectMusicClick(){
 		musiclist.SetActive (true);
+
 	}
 
 	public void SendMusicPath(string musicPath){
@@ -137,6 +139,7 @@ public class RPCLogicHandler : MonoBehaviour
 
 		DataManager dm = DataManager.Instance;
 		dm.musicPath = music;
+		slider.SetActive (true);
 	}
 
 	[RPC]

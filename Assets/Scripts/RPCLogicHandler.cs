@@ -62,12 +62,12 @@ public class RPCLogicHandler : MonoBehaviour
 		networkView.RPC ("OnGameSceneLoaded", RPCMode.Others, null);
 	}
 
-	public void SelectMusic(){
+	public void OnSelectMusicClick(){
 		musiclist.SetActive (true);
 	}
 
-	public void SendMusicPath(string music){
-		networkView.RPC ("OnMusicSelected", RPCMode.Others, music);
+	public void SendMusicPath(string musicPath){
+		networkView.RPC ("OnMusicSelected", RPCMode.Others, musicPath);
 	}
 
 	public void sendMusicReady(){
@@ -81,7 +81,7 @@ public class RPCLogicHandler : MonoBehaviour
 		}
 	}
 
-	public void SendReady()
+	public void SendPlayReady()
 	{
 		//click the play button
 		_ready = true;

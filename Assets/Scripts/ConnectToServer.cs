@@ -15,8 +15,8 @@ public class ConnectToServer : MonoBehaviour {
 	private static bool networkFail;
 	private static bool opponentNetworkFail;
 
-	private static bool musicSet;
-	private static bool opponentMusicSet;
+	private static bool musicReady;
+	private static bool opponentMusicReady;
 
 	private MultiMainLogic _mainLogic;
 
@@ -26,6 +26,7 @@ public class ConnectToServer : MonoBehaviour {
 	private string music;
 	DataManager dm;
 	private bool musicSelected;
+	public bool analysisFinished;
 
 	// Use this for initialization
 	void Awake(){
@@ -55,43 +56,54 @@ public class ConnectToServer : MonoBehaviour {
 		m_websocket.OnTextMessageRecv -= HandleOnTextMessageRecv;
 	}
 
+	// Update is called once per frame
+	void Update () {
+		if (dm.musicPath != null && !musicSelected) {
+			SendMusicPath(dm.musicPath);
+			musicSelected = true;
+		}
+		if ( musicSelected && analysisFinished) {
+			sendMusicReady();
+			analysisFinished = false; // only send once
+		}
+	}
+
 	void HandleOnTextMessageRecv (string mes)
 	{
-		Debug.Log("----> Message received");
+		Debug.Log ("----> Message received");
 		JSONObject message = new JSONObject (mes);
-		//Debug.Log ("MessageRecv: " + message);
-		string mm = message["header"].str;
-		string mmm = message["header"].ToString ();
 
-		switch (message["header"].str) {
+		switch (message ["header"].str) {
 		case "Connected":
 			opponentNetworkReady = true;
-			if(networkReady){
+			if (networkReady) {
 				selectButton.SetActive (true);
 			}
 			break;
 		case "playReady":
 			opponentPlayReady = true;
-			if(playReady){
-				Application.LoadLevel("MultiSpace");
+			if (playReady) {
+				Application.LoadLevel ("MultiSpace");
 			}
 			break;
 		case "move":
-			string _playerName = message["playerName"].str;
-			float _tunnelOffset = (float)message["tunnelOffset"].n;
-			bool _boosting = message["boosting"].b; 
-			float _energy = (float)message["energy"].n; 
-			float _hp = (float)message["hp"].n;
-			float _score = (float)message["score"].n;
-			_mainLogic.ProccessMoveCommunication(_playerName, _tunnelOffset, _boosting, _energy, _hp, _score);
+			string _playerName = message ["playerName"].str;
+			float _tunnelOffset = (float)message ["tunnelOffset"].n;
+			bool _boosting = message ["boosting"].b; 
+			float _energy = (float)message ["energy"].n; 
+			float _hp = (float)message ["hp"].n;
+			float _score = (float)message ["score"].n;
+			_mainLogic.ProccessMoveCommunication (_playerName, _tunnelOffset, _boosting, _energy, _hp, _score);
 			break;
 		case "Disconnected":
 			opponentNetworkFail = true;
 			break;
-		case "setMusic":
-			opponentMusicSet = true;
-			string music = message["Music"].str;
-			SetMusic(music);
+		case "musicPath":
+			string musicPath = message ["path"].str;
+			OnMusicSelected (musicPath);
+			break;
+		case "musicReady":
+			OnMusicReady ();
 			break;
 		}
 	}
@@ -120,14 +132,6 @@ public class ConnectToServer : MonoBehaviour {
 			selectButton.SetActive (true);
 		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		if (dm.musicPath != null && !musicSelected) {
-			SetMusic(dm.musicPath);
-			musicSelected = true;
-		}
-	}
 
 	public static bool isGameReady(){
 		return playReady && opponentPlayReady;
@@ -136,52 +140,57 @@ public class ConnectToServer : MonoBehaviour {
 	public static bool isNetworkFail(){
 		return networkFail && opponentNetworkFail;
 	}
-	
-	public void testFun(){
-		JSONObject obj = new JSONObject(JSONObject.Type.OBJECT);
-		
-		obj.AddField ("header", "test");
-		obj.AddField ("test", "for send test");
 
-		m_websocket.Send(obj.ToString());
+	public void OnSelectMusicClick(){
+		musiclist.SetActive (true);
 	}
 
-	public void OnSelectMusic(){
-		musiclist.gameObject.SetActive (true);
+	public void SendMusicPath(string musicPath){
+		//networkView.RPC ("OnMusicSelected", RPCMode.Others, music);
+		JSONObject obj = new JSONObject ();
+		obj.AddField ("header", "musicPath");
+		obj.AddField ("path", musicPath);
+		m_websocket.Send (obj.ToString());
 	}
 
-	public void SetMusic(string music){
-		//set music with the id
-		if (!musicSet) {
-			musicSet = true;
-			dm.musicPath = music;
+	public void OnMusicSelected(string musicPath){
+		musicSelected = true;
 
-			JSONObject obj = new JSONObject ();
-			obj.AddField ("header", "setMusic");
-			obj.AddField ("Music", music);
-			m_websocket.Send (obj.ToString());
-		}
-		if (opponentMusicSet) {
+		DataManager dm = DataManager.Instance;
+		dm.musicPath = musicPath;
+	}
+
+	public void sendMusicReady(){
+		musicReady = true;
+
+		JSONObject obj = new JSONObject ();
+		obj.AddField ("header", "musicReady");
+		m_websocket.Send (obj.ToString());
+
+		if (opponentMusicReady) {
 			playButton.SetActive(true);
 		}
 	}
 
-	public void OnPlayReady(){
+	public void OnMusicReady(){
+		opponentMusicReady = true;
+		if (musicReady) {
+			playButton.SetActive(true);
+		}
+	}
+
+	public void SendPlayReady(){
 		playReady = true;
 
-		JSONObject obj = new JSONObject();
-		
+		JSONObject obj = new JSONObject();		
 		obj.AddField ("header", "playReady");
-
 		m_websocket.Send (obj.ToString());
-
+	
 		if (opponentPlayReady) {
 			Application.LoadLevel("MultiSpace");
 		}
 	}
-
-	//SendMoveCommunication(playerName, tunnelOffset, boosting, energy, hp, score);
-	//string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score)
+	
 	public static void SendMoveInfo(string playerName, float tunnelOffset, bool boosting, float energy, float hp, float score){
 		JSONObject move = new JSONObject ();
 		move.Clear ();
@@ -195,6 +204,15 @@ public class ConnectToServer : MonoBehaviour {
 		move.AddField ("score", score);
 
 		m_websocket.Send (move.ToString());
+	}
+
+	public void testFun(){
+		JSONObject obj = new JSONObject(JSONObject.Type.OBJECT);
+		
+		obj.AddField ("header", "test");
+		obj.AddField ("test", "for send test");
+		
+		m_websocket.Send(obj.ToString());
 	}
 
 }

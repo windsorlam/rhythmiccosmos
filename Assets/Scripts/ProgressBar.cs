@@ -12,6 +12,7 @@ public class ProgressBar : MonoBehaviour {
 	private IAsyncResult ar;
 
 	RPCLogicHandler _rpcHandler;
+	ConnectToServer _connectToServer;
 	// Use this for initialization
 	void Start () {
 		GameObject fb=GameObject.FindWithTag ("Browser");
@@ -27,8 +28,11 @@ public class ProgressBar : MonoBehaviour {
 		if (analysisFinished) {
 			aDelegate.EndInvoke(ar);
 			if( dm.isMultiPlayerMode ){
-				_rpcHandler.analysisFinished = true;
-				//Application.LoadLevel("MultiSpace");
+				if(_rpcHandler != null){
+					_rpcHandler.analysisFinished = true;
+				}else if(_connectToServer != null){
+					_connectToServer.analysisFinished = true;
+				}
 			}else{
 				Application.LoadLevel("Space");
 			}

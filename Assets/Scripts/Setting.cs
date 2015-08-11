@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
+using System;
 
 public class Setting : MonoBehaviour {
 	
@@ -10,9 +12,13 @@ public class Setting : MonoBehaviour {
 	public GameObject[] airCrafts;
 	public static int planeIndex = 0;
 
+	public int difficulty = 0;
+
 	public GameObject pivot;
 	private float movement = 0 ;
 
+	public Scrollbar sr;
+	
 	// Use this for initialization
 	void Start () {
 
@@ -20,7 +26,10 @@ public class Setting : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
+		if (sr.value == 1)
+			difficulty = 1;
+		else 
+			difficulty = 0;
 	}
 
 
@@ -63,6 +72,7 @@ public class Setting : MonoBehaviour {
 		Camera.main.GetComponent<Skybox> ().material = skyboxMatFinal;
 		Debug.Log (index);
 	}
+
 
 
 }

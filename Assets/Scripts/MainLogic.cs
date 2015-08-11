@@ -458,7 +458,11 @@ public class MainLogic : MonoBehaviour {
 	//按下右下角的按钮则调用此函数
 	public void OnPress()
 	{
-		if (currentCollection == null) return;
+		if (currentCollection == null) {
+			hpUI.value -= 0.07f;
+			ResetCombo();
+			return;
+		}
 		Destroy(currentCollection); //销毁光晕
 		
 		hpUI.value += (0.5f + combo * 0.1f) * 0.2f;  //增加HP

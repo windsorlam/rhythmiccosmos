@@ -38,9 +38,11 @@ public class Analyzer
 		case DataManager.EASY:
 			beatInterval=5;
 			melodyInterval=1;
+			break;
 		case DataManager.HARD:
 			beatInterval=2.2;
 			melodyInterval=0.2;
+			break;
 		}
 		string dir= Environment.CurrentDirectory;
 		string melodyPath = "melody.yaml";

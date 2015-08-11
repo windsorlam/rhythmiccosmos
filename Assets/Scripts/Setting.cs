@@ -32,7 +32,7 @@ public class Setting : MonoBehaviour {
 			difficulty = 0;
 		}
 		DataManager dm = DataManager.Instance;
-		dm.difficulty = difficulty;
+		dm.difficulty = (byte)difficulty;
 	}
 
 

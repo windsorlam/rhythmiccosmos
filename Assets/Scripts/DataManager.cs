@@ -19,8 +19,8 @@ public class DataManager
 	public string musicPath = null;
 	public bool isMultiPlayerMode=false;
 
-	public static byte HARD=1;
-	public static byte EASY=0;
+	public const byte HARD=1;
+	public const byte EASY=0;
 	
 	private DataManager ()
 	{

@@ -115,7 +115,7 @@ public class Analyzer
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						fullBeatList.Add((float)time-fulllasttime);
+						fullBeatList.Add((float)(time-fulllasttime));
 						fulllasttime=time;
 						if(interval<2.2)
 							continue;
@@ -131,7 +131,7 @@ public class Analyzer
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						onsetList.Add((float)(interval));
+						onsetList.Add((float)interval);
 						lasttime=time;
 					}
 					controlsPerSec+=onsetList.Count/time;

@@ -13,14 +13,14 @@ using System.Collections;
 public class DataManager
 {
 	public ArrayList beatList = null;
+	public ArrayList fullBeatList = null;
 	public ArrayList onsetList = null;
 	public ArrayList melodyList = null;
 	public string musicPath = null;
 	public bool isMultiPlayerMode=false;
 
-	public static string HARD="Hard";
-	public static string MEDIUM="Medium";
-	public static string EASY="Easy";
+	public const byte HARD=1;
+	public const byte EASY=0;
 	
 	private DataManager ()
 	{
@@ -35,17 +35,6 @@ public class DataManager
 
 	public float progress=0.0f;
 	public double difficultyRatio=0.0;
-	public string difficulty{
-		get{
-			if(difficultyRatio>5){
-				return HARD;
-			}else{
-				if(difficultyRatio<1){
-					return EASY;
-				}else{
-					return MEDIUM;
-				}
-			}
-		}
-	}
+	public byte difficulty=0;
+
 }

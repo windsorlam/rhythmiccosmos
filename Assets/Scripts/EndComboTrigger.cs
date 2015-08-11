@@ -13,12 +13,15 @@ public class EndComboTrigger : MonoBehaviour {
     {
 		if (other.collider.gameObject.tag == "Collection" && UIEvents.multiMode == false) {
 			logic.ResetCombo ();
-			logic.hpUI.value -= 0.1f;
+			logic.hpUI.value -= 0.07f;
+			logic.speedFactor = 1.0f;
 			Time.timeScale = 1;
 		} else if (other.collider.gameObject.tag == "Collection" && UIEvents.multiMode == true) {
 			multiLogic.ResetCombo ();
-			multiLogic.hpUI.value -= 0.1f;
+			multiLogic.hpUI.value -= 0.07f;
+			logic.speedFactor = 1.0f;
 			Time.timeScale = 1;
+
 		}
 	}
 

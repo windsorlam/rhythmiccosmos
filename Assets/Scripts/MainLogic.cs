@@ -138,7 +138,7 @@ public class MainLogic : MonoBehaviour {
 		airCrafts [Setting.planeIndex].SetActive (true);
 
 		DataManager dm=DataManager.Instance;
-		highlightIntervalList=  dm.beatList;
+		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
 
 		//提示轨道偏移
@@ -276,7 +276,7 @@ public class MainLogic : MonoBehaviour {
 			DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 			DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
 
-			speedFactor = 1.2f;
+			speedFactor = 1.4f;
 
 			playerSpeed *= 2f;
 		}
@@ -307,7 +307,7 @@ public class MainLogic : MonoBehaviour {
 			highlightIntervalIndex++;
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
-			nextDir = rd.Next(0,5)-2;
+			nextDir = rd.Next(0,2)-1;
 			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 			//Debug.Log (nextDir);
 			
@@ -328,7 +328,6 @@ public class MainLogic : MonoBehaviour {
 		{
 			scoreHighlightTimer[indexFollow] = -10000f;
 			currentHighlight = (int)highlight.Dequeue();
-			Debug.Log("here" + currentHighlight);
 
 			indexFollow++;
 			if(indexFollow > 9) indexFollow = 0;	
@@ -362,7 +361,7 @@ public class MainLogic : MonoBehaviour {
 		} 
 		else if(!boosting)
 		{
-			hpUI.value -= Time.deltaTime * Time.deltaTime * 10f;  //HP减少
+			hpUI.value -= Time.deltaTime * Time.deltaTime * 20f;  //HP减少
 		}
 	}
 	
@@ -459,10 +458,14 @@ public class MainLogic : MonoBehaviour {
 	//按下右下角的按钮则调用此函数
 	public void OnPress()
 	{
-		if (currentCollection == null) return;
+		if (currentCollection == null) {
+			hpUI.value -= 0.07f;
+			ResetCombo();
+			return;
+		}
 		Destroy(currentCollection); //销毁光晕
 		
-		hpUI.value += (1 + combo * 0.1f) * 0.2f;  //增加HP
+		hpUI.value += (0.5f + combo * 0.1f) * 0.2f;  //增加HP
 		score += 10 + combo * combo / 10;
 		scoreUI.text = ((int)score).ToString();     //加分
 		
@@ -498,7 +501,9 @@ public class MainLogic : MonoBehaviour {
 		
 		hpUI.value += combo / 1000;
 		
-		energyUI.value += (1f + 2f / combo)/10f;
+		energyUI.value += (0.2f + 2f / (2+combo))/20f;
+
+		speedFactor += 0.01f;
 		
 		
 		score += (100 + combo)*(boosting ? 2 : 1);

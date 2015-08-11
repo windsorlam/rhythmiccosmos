@@ -149,6 +149,9 @@ public class MultiMainLogic : MonoBehaviour {
 	public ArrayList dirIntervalList = new ArrayList(); 
 	int dirIntervalIndex = 0;
 
+
+	public float speedFactor = 1.0f;
+	
 	// Use this for initialization
 	void Start () {
 		interval = currentOffset / currentSpeed;    //克隆隧道的间隔时间等于隧道之间的间隔除以隧道的移动速度
@@ -181,8 +184,8 @@ public class MultiMainLogic : MonoBehaviour {
 		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
-		highlightIntervalList=  dm.beatList;
-		//dirIntervalList = dm.beatList; 
+		highlightIntervalList=  dm.fullBeatList;
+		dirIntervalList = dm.beatList; 
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -245,12 +248,12 @@ public class MultiMainLogic : MonoBehaviour {
 			scoreHighlightTimer[i] += Time.deltaTime;
 		}
 		
-		
+		tunnelOffset += currentSpeed * Time.deltaTime * speedFactor;
+
 		GenerateEnviroment ();
 		
 		CheckFever ();
 
-		tunnelOffset += Time.deltaTime * currentSpeed;
 
 		if (Network.peerType == NetworkPeerType.Client || Network.peerType == NetworkPeerType.Server) {
 			Debug.Log("Network connected.!!!!! going to send message");
@@ -406,21 +409,9 @@ public class MultiMainLogic : MonoBehaviour {
 				boosting = true;
 				DOTween.To(() => energyUI.value, x => energyUI.value = x, 0, 8).SetEase(Ease.Linear).OnComplete(EndBoosting);
 				DOTween.To(() => energyUI.GetComponent<UISprite>().color, x => energyUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 0.5f), 0.5f).SetLoops(16, LoopType.Yoyo).SetEase(Ease.Linear);
-				currentSpeed *= 3;
-				GameObject[] elements1 = GameObject.FindGameObjectsWithTag("Element");
-				foreach (GameObject e in elements1)
-				{
-					e.GetComponent<ElementMovement>().speed = currentSpeed;
-				}
-				GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-				foreach (GameObject e in elements2)
-				{
-					e.GetComponent<ElementMovement>().speed = -currentSpeed;
-				}
 				
-				interval = currentOffset / currentSpeed;
-				dirInterval /= 2;
-				//spawaner.interval /= 2;
+				speedFactor = 1.4f;
+				
 				playerSpeed *= 2f;
 			}
 		}
@@ -449,7 +440,7 @@ public class MultiMainLogic : MonoBehaviour {
 			highlightIntervalIndex++;
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
-			nextDir = rd.Next(0,5)-2;
+			nextDir = rd.Next(0,2)-1;
 			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 			//Debug.Log (nextDir);
 			
@@ -470,7 +461,6 @@ public class MultiMainLogic : MonoBehaviour {
 		{
 			scoreHighlightTimer[indexFollow] = -10000f;
 			currentHighlight = (int)highlight.Dequeue();
-			Debug.Log("here" + currentHighlight);
 			
 			indexFollow++;
 			if(indexFollow > 9) indexFollow = 0;	
@@ -483,23 +473,10 @@ public class MultiMainLogic : MonoBehaviour {
 	{
 		feverUI.SetActive (false);
 		boosting = false;
-		currentSpeed /= 3;
-		dirInterval *= 2;
-//		spawaner.interval *= 2;
+		
 		playerSpeed /= 2f;
-		interval = currentOffset / currentSpeed;
 		
-		GameObject[] elements = GameObject.FindGameObjectsWithTag("Element");
-		foreach (GameObject e in elements)
-		{
-			e.GetComponent<ElementMovement>().speed = currentSpeed;
-		}
-		
-		GameObject[] elements2 = GameObject.FindGameObjectsWithTag("Collection");
-		foreach (GameObject e in elements2)
-		{
-			e.GetComponent<ElementMovement>().speed = -currentSpeed;
-		}
+		speedFactor = 1.0f;
 		
 		hpUI.value += 0.2f;
 
@@ -625,7 +602,7 @@ public class MultiMainLogic : MonoBehaviour {
 		if (currentCollection == null) return;
 		Destroy(currentCollection); //销毁光晕
 		
-		hpUI.value += (1 + combo * 0.1f) * 0.2f;  //增加HP
+		hpUI.value += (0.5f + combo * 0.1f) * 0.2f;  //增加HP
 		score += 10 + combo * combo / 10;
 		scoreUI.text = ((int)score).ToString();     //加分
 
@@ -663,8 +640,10 @@ public class MultiMainLogic : MonoBehaviour {
 		DOTween.To(() => bgUI.GetComponent<UISprite>().color, x => bgUI.GetComponent<UISprite>().color = x, new Color(1, 1, 1, 100 / 255f), 0.1f).SetDelay(0.2f).SetEase(Ease.Linear);
 		
 		hpUI.value += combo / 1000;
+
+		speedFactor += 0.01f;
 		
-		energyUI.value += (1f + 2f / combo)/10f;
+		energyUI.value += (0.2f + 2f / (combo + 2))/20f;
 
 		//================== by lxy
 		hp = hpUI.value;

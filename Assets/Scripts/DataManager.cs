@@ -13,6 +13,7 @@ using System.Collections;
 public class DataManager
 {
 	public ArrayList beatList = null;
+	public ArrayList fullBeatList = null;
 	public ArrayList onsetList = null;
 	public ArrayList melodyList = null;
 	public string musicPath = null;

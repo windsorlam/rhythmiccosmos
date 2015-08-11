@@ -104,15 +104,19 @@ public class Analyzer
 			 */
 			ArrayList beatList=new ArrayList();
 			ArrayList onsetList=new ArrayList();
+			ArrayList fullBeatList=new ArrayList();
 			while ((line=sr2.ReadLine())!=null){
 				dm.progress+=(float)line.Length*20f/(float)fileSize;
 				if(line.Contains("beats_position")){
 					string[] tokens=line.Trim("beats_position: []".ToCharArray()).Split(',');
 					double lasttime=0.0;
+					double fulllasttime=0.0;
 					double time=0.0;
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
+						fullBeatList.Add((float)time-fulllasttime);
+						fulllasttime=time;
 						if(interval<2.2)
 							continue;
 						beatList.Add((float)(interval));
@@ -139,6 +143,7 @@ public class Analyzer
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
+			dm.fullBeatList=fullBeatList;
 			dm.difficultyRatio=controlsPerSec;
 			Console.WriteLine(dm.difficulty);
 			for (; dm.progress<100; dm.progress+=0.01f);

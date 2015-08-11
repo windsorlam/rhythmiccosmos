@@ -184,8 +184,8 @@ public class MultiMainLogic : MonoBehaviour {
 		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
-		highlightIntervalList=  dm.beatList;
-		//dirIntervalList = dm.beatList; 
+		highlightIntervalList=  dm.fullBeatList;
+		dirIntervalList = dm.beatList; 
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -437,7 +437,7 @@ public class MultiMainLogic : MonoBehaviour {
 			highlightIntervalIndex++;
 			highlightTimer = 0;
 			System.Random rd = new System.Random();
-			nextDir = rd.Next(0,5)-2;
+			nextDir = rd.Next(0,2)-1;
 			//nextDir = Random.Range(0, 2) == 0 ? -1 : 1;
 			//Debug.Log (nextDir);
 			

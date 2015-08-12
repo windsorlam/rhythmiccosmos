@@ -229,7 +229,7 @@ public class MultiMainLogic : MonoBehaviour {
 		if (UIEvents.LANorWAN == 1) {
 			if(!_rpcHandler.isGameReadyToPlay()) return;
 		} else if (UIEvents.LANorWAN == 2) {
-			if (!ConnectToServer.isGameReady ()) return;
+			//if (!ConnectToServer.isGameReady ()) return;
 		}
 
 		CheckHp ();    //get current HP value
@@ -267,12 +267,12 @@ public class MultiMainLogic : MonoBehaviour {
 		}
 
 		if (UIEvents.LANorWAN == 2) {
-			ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
+			//ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
 		}
 
-		if (ConnectToServer.isNetworkFail()) {
+		/*if (ConnectToServer.isNetworkFail()) {
 			NetworkFailUI.SetActive(true);
-		}
+		}*/
 	} 
 
 	public void ProccessNetworkFailUI(){

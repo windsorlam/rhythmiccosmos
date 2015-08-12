@@ -12,7 +12,7 @@ public class Setting : MonoBehaviour {
 	public GameObject[] airCrafts;
 	public static int planeIndex = 0;
 
-	public int difficulty = 0;
+	public static int difficulty = 0;
 
 	public GameObject pivot;
 	private float movement = 0 ;
@@ -22,6 +22,8 @@ public class Setting : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+		sr.value = difficulty;
+		//DontDestroyOnLoad (this);
 	}
 	
 	// Update is called once per frame
@@ -31,6 +33,7 @@ public class Setting : MonoBehaviour {
 		} else {
 			difficulty = 0;
 		}
+		Debug.Log (difficulty);
 		DataManager dm = DataManager.Instance;
 		dm.difficulty = (byte)difficulty;
 	}

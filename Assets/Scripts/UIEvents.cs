@@ -2,13 +2,16 @@
 //用来处理各种按钮消息
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class UIEvents : MonoBehaviour {
 	public static bool multiMode = false;
 	public static int LANorWAN; //1 LAN  2 WAN
+	public static string playerName;
+
+	public InputField nameInputField;
 	// Use this for initialization
 	void Start () {
-
 	}
 	
 	// Update is called once per frame
@@ -33,7 +36,7 @@ public class UIEvents : MonoBehaviour {
 
 	public void OnStartClick()
     {
-        Application.LoadLevel("ModeChoose");
+		Application.LoadLevel ("InputName");
     }
 
     public void OnQuitClick()
@@ -71,6 +74,15 @@ public class UIEvents : MonoBehaviour {
 	public void OnMultiClick()
 	{
 		Application.LoadLevel ("ConnectionMethodChooser");
+	}
+
+	public void OnEndEditClick(){
+		if (nameInputField.text.Length <= 0) {
+			return;
+		} else {
+			playerName = nameInputField.text;
+			Application.LoadLevel("ModeChoose");
+		}
 	}
 
 	public void OnLANClick(){

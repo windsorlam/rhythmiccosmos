@@ -4,7 +4,7 @@ using System.Collections;
 public class myConnection : MonoBehaviour {
 	////---- UI part variable *******************************************
 	private GUIStyle labelStyle = new GUIStyle ();  //GUIStyle of label
-	private string statusLabel = "Waiting to start ... "; //display the connection status
+	//private string statusLabel = "Waiting to start ... "; //display the connection status
 	private string GUIStatus = "init"; //controler of the UI 
 
 	////---- Publish/Browsing Service part variable *********************
@@ -21,11 +21,12 @@ public class myConnection : MonoBehaviour {
 	private bool justStop = false; //use when just want stop browsing, do not want to publish service
 
 	////---- RPC part1, for communication *******************************
-	string sendMessage = "";
-	string recMessage = "";
+	//string sendMessage = "";
+	//string recMessage = "";
 
 	GameObject playButton;
 	GameObject selectButton;
+	GameObject waitingLabel;
 	////---- RPC part2, for sync 2 fighters *****************************
 
 	public bool dontDestroyOnLoad = true;
@@ -44,8 +45,10 @@ public class myConnection : MonoBehaviour {
 
 		playButton = GameObject.Find("MultiPlayStart");
 		selectButton = GameObject.Find ("MultiSelectMusic");
+		waitingLabel = GameObject.Find ("WaitingMusic");
 		selectButton.gameObject.SetActive (false);
 		playButton.gameObject.SetActive (false);
+		waitingLabel.SetActive (false);
 
 		if (dontDestroyOnLoad) {
 			//Makes the object target not be destroyed automatically when loading a new scene.
@@ -63,10 +66,10 @@ public class myConnection : MonoBehaviour {
 	}
 
 	//reset all send and received message box
-	void ResetMessage(){
-		recMessage = "";
-		sendMessage = "";
-	}
+	//void ResetMessage(){
+		//recMessage = "";
+		//sendMessage = "";
+	//}
 
     ////---- Part1: browsing, resolve and connect (as a client)
 	void StartMatch(){
@@ -119,11 +122,12 @@ public class myConnection : MonoBehaviour {
 	}
 
 	void OnClient(){
-		playButton.SetActive(true);
+		//playButton.SetActive(true);
 		if (!connected) {
 			//GUIStatus = "start";
 			found = false;
 		}
+		waitingLabel.SetActive (true);
 	}
 
 	void OnServer(){
@@ -196,20 +200,20 @@ public class myConnection : MonoBehaviour {
 		Debug.Log ("----> OnBrowsingStarted called");
 		if (started) {
 			broStatus = true;
-			statusLabel = "Start Browsing ... ";
+			//statusLabel = "Start Browsing ... ";
 			GUIStatus = "browsing";
 			Debug.Log ("----> Browsing Started ... ");
 			Debug.Log("=== GUIStatus: "+ GUIStatus);
 		} else {
 			Debug.Log ("---> Browsing Not Started yet ... ");
-			statusLabel = "Browsing haven't been started yet";
+			//statusLabel = "Browsing haven't been started yet";
 		}
 	}
 	
 	//browsing could not initialize correctly
 	public void OnBrowsingFailed(){
 		broStatus = false;
-		statusLabel = "Can not start browsing ... ";
+		//statusLabel = "Can not start browsing ... ";
 		Debug.Log ("---->OnBrowsingFailed called. Can not start browsing ... ");
 	}
 	
@@ -217,7 +221,7 @@ public class myConnection : MonoBehaviour {
 		found = true;
 		Debug.Log ("----> OnServiceFound called.");
 		foundServiceName = servicename;
-		statusLabel = "Service: [" + foundServiceName + "] is found";
+		//statusLabel = "Service: [" + foundServiceName + "] is found";
 		StopBrowsing ();//stop browsing as soon as found a service
 	}
 
@@ -230,12 +234,12 @@ public class myConnection : MonoBehaviour {
 			Debug.Log ("---> Stop browsing successfully with justStop. (OnBrowsingStopped)");
 		}else if (found) {
 			//when a service is founs, stop browsing and connect to the service
-			statusLabel = "Going to connect a  service ... ";
+			//statusLabel = "Going to connect a  service ... ";
 			Debug.Log ("---> Connect To Service (OnBrowsingStopped)");
 			MultiManager.ResolveService(foundServiceName);
 		} else {
 			//when no service existing, publish a service
-			statusLabel = "Going to publish a server service ... ";
+			//statusLabel = "Going to publish a server service ... ";
 			Debug.Log ("----> Start to publish a service (OnBrowsingStopped)");
 			PublishService();
 		}
@@ -245,7 +249,7 @@ public class myConnection : MonoBehaviour {
 
 	//When trying to connect, should resolve a service first to retrieve data.
 	public void OnResolvingFailed(){
-		statusLabel = "Can not resolve service ... ";
+		//statusLabel = "Can not resolve service ... ";
 		GUIStatus = "start";
 		broStatus = false;
 		found = false;
@@ -253,7 +257,7 @@ public class myConnection : MonoBehaviour {
 	}
 	
 	public void OnServiceResolved(){
-		statusLabel = "Connecting to a resolved service.";
+		//statusLabel = "Connecting to a resolved service.";
 		Debug.Log ("----> OnServiceResolved called, connecting to a resolved service");
 		if (MultiManager.ConnectToResolvedService (foundServiceName)) {
 			GUIStatus = "client";
@@ -266,21 +270,21 @@ public class myConnection : MonoBehaviour {
 		broStatus = false;
 		GUIStatus = "start";
 		Debug.Log ("----> OnServiceLost called.");
-		statusLabel = "service lost ... ";
+		//statusLabel = "service lost ... ";
 		connected = false;
 	}
 	
 	////************************* server part callback function ***********************************
 	public void OnServiceWillPublish(){
 		pubStatus = true;
-		statusLabel = "Service is going to publish";
+		//statusLabel = "Service is going to publish";
 		Debug.Log ("----> OnServiceWillPublish called.");
 	}
 	
 	public void OnServicePublished(string serviceName){
 		pubStatus = true;
 		GUIStatus = "server";
-		statusLabel = "Service: [" + publishServiceName + "] has been publish successfully. Waiting for client ...";
+		//statusLabel = "Service: [" + publishServiceName + "] has been publish successfully. Waiting for client ...";
 
 		Debug.Log ("----> OnServicePublished called ============= ");
 		Debug.Log ("ipAddress: " + Network.player.ipAddress);
@@ -291,14 +295,14 @@ public class myConnection : MonoBehaviour {
 
 	public void OnPublishFailed(){
 		pubStatus = false;
-		statusLabel = "Publish failed. Going to stop publish servie.";
+		//statusLabel = "Publish failed. Going to stop publish servie.";
 		StopPublish ();
 		GUIStatus = "start";
 		Debug.Log ("----> OnPublishFailed ... ");
 	}
 
 	public void OnServicePublishStopped(string serviceName){
-		statusLabel = "Service: [" + publishServiceName + "] has been stopped";
+		//statusLabel = "Service: [" + publishServiceName + "] has been stopped";
 		Debug.Log ("----> OnServicePublishStopped called.");
 		GUIStatus = "start";
 		pubStatus = false;

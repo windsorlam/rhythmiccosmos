@@ -12,19 +12,25 @@ public class ConnectToServer : MonoBehaviour {
 	private static bool playReady;
 	private static bool opponentPlayReady;
 
+	private static bool sceneLoaded;
+	private static bool opponentSceneLoaded;
+
 	private static bool networkFail;
 	private static bool opponentNetworkFail;
 
 	private static bool musicReady;
 	private static bool opponentMusicReady;
-
+	
 	private MultiMainLogic _mainLogic;
 
+	string role;
+
+	GameObject testButton;
 	GameObject playButton;
 	GameObject selectButton;
+	GameObject waitingLabel;
 	GameObject musiclist;
 	GameObject slider;
-	private string music;
 	DataManager dm;
 	private bool musicSelected;
 	public static bool analysisFinished;
@@ -40,15 +46,31 @@ public class ConnectToServer : MonoBehaviour {
 
 		m_websocket.Connect ("https://shared.staging.mossapi.com/connect");
 
+		testButton = GameObject.Find ("sendtest");
 		playButton = GameObject.Find("MultiPlayStart");
 		selectButton = GameObject.Find ("MultiSelectMusic");
 		slider = GameObject.Find ("Slider");
 		musiclist = GameObject.Find ("MusicList");
+		waitingLabel = GameObject.Find ("WaitingMusic");
+
+		waitingLabel.SetActive (false);
+		testButton.SetActive (false);
+		selectButton.SetActive (false);
 		playButton.SetActive (false);
+		musiclist.SetActive (false);
 
 		dm = DataManager.Instance;
 
 		DontDestroyOnLoad (this);
+	}
+
+	public void SetSceneLoaded(MultiMainLogic logic){
+		sceneLoaded = true;
+		_mainLogic = logic;
+
+		JSONObject obj = new JSONObject ();
+		obj.AddField("header", "sceneLoaded");
+		m_websocket.Send (obj.ToString());
 	}
 
 	void OnDestroy(){
@@ -64,8 +86,7 @@ public class ConnectToServer : MonoBehaviour {
 			SendMusicPath(dm.musicPath);
 			musicSelected = true;
 		}
-		if ( musicSelected && analysisFinished) {
-			Debug.Log("1111111");
+		if ( musicSelected && analysisFinished ) {
 			sendMusicReady();
 			analysisFinished = false; // only send once
 		}
@@ -77,17 +98,40 @@ public class ConnectToServer : MonoBehaviour {
 		JSONObject message = new JSONObject (mes);
 
 		switch (message ["header"].str) {
+		case "client":
+			role = "client";
+			break;
+		case "server":
+			role = "server";
+			break;
 		case "Connected":
 			opponentNetworkReady = true;
-			if (networkReady) {
+			Debug.Log("ooooooo connected");
+
+			Debug.Log("role:" + role);
+			if (networkReady && role.Equals("server")) {
 				selectButton.SetActive (true);
+			}else if(networkReady && role.Equals("client")){
+				waitingLabel.SetActive (true);
 			}
+			break;
+		case "musicPath":
+			//receive selected music from opponent
+			string musicPath = message ["path"].str;
+			OnMusicSelected (musicPath);
+			break;
+		case "musicReady":
+			OnMusicReady ();
 			break;
 		case "playReady":
 			opponentPlayReady = true;
 			if (playReady) {
-				Application.LoadLevel ("MultiSpace");
+				playButton.SetActive(true);
+				//Application.LoadLevel ("MultiSpace");
 			}
+			break;
+		case "sceneLoaded":
+			opponentSceneLoaded = true;
 			break;
 		case "move":
 			string _playerName = message ["playerName"].str;
@@ -98,16 +142,14 @@ public class ConnectToServer : MonoBehaviour {
 			float _score = (float)message ["score"].n;
 			_mainLogic.ProccessMoveCommunication (_playerName, _tunnelOffset, _boosting, _energy, _hp, _score);
 			break;
+		case "fail":
+			float _opScore = (float)message["score"].n;
+			_mainLogic.ProccessFailUI(true, _opScore);
+			break;
 		case "Disconnected":
 			opponentNetworkFail = true;
 			break;
-		case "musicPath":
-			string musicPath = message ["path"].str;
-			OnMusicSelected (musicPath);
-			break;
-		case "musicReady":
-			OnMusicReady ();
-			break;
+		
 		}
 	}
 
@@ -126,41 +168,40 @@ public class ConnectToServer : MonoBehaviour {
 	{
 		networkReady = true;
 		Debug.Log ("Network Connected");
-		JSONObject obj = new JSONObject ();
-
-		obj.AddField ("header", "Connected");
-		m_websocket.Send(obj.ToString());
-
-		if (opponentNetworkReady) {
-			selectButton.SetActive (true);
-		}
 	}
 
-	public static bool isGameReady(){
-		return playReady && opponentPlayReady;
+	public bool isGameReady(){
+		return sceneLoaded && opponentSceneLoaded;
 	}
 
-	public static bool isNetworkFail(){
+	public bool isNetworkFail(){
 		return networkFail && opponentNetworkFail;
 	}
 
+	//click select music button
 	public void OnSelectMusicClick(){
 		musiclist.SetActive (true);
 	}
 
+	//send selected music to opponent
 	public void SendMusicPath(string musicPath){
-		//networkView.RPC ("OnMusicSelected", RPCMode.Others, music);
 		JSONObject obj = new JSONObject ();
 		obj.AddField ("header", "musicPath");
 		obj.AddField ("path", musicPath);
+
 		m_websocket.Send (obj.ToString());
 	}
 
+	//received selected music from opponent
 	public void OnMusicSelected(string musicPath){
 		musicSelected = true;
+		waitingLabel.SetActive (false);
 
+		//set music follow opponent
 		DataManager dm = DataManager.Instance;
 		dm.musicPath = musicPath;
+
+		slider.SetActive (true);
 	}
 
 	public void sendMusicReady(){
@@ -170,17 +211,14 @@ public class ConnectToServer : MonoBehaviour {
 		obj.AddField ("header", "musicReady");
 		m_websocket.Send (obj.ToString());
 
-		Debug.Log("2222222222");
-
-		//if (opponentMusicReady) {
+		if (opponentMusicReady) {
 			playButton.SetActive(true);
-		//}
+		}
 	}
 
+	//receive music ready from opponent
 	public void OnMusicReady(){
 		opponentMusicReady = true;
-
-		slider.SetActive (true);
 
 		if (musicReady) {
 			playButton.SetActive(true);
@@ -194,12 +232,15 @@ public class ConnectToServer : MonoBehaviour {
 		obj.AddField ("header", "playReady");
 		m_websocket.Send (obj.ToString());
 	
-		//if (opponentPlayReady) {
+		if (opponentPlayReady) {
 			Application.LoadLevel("MultiSpace");
-		//}
+		}
 	}
 	
-	public static void SendMoveInfo(string playerName, float tunnelOffset, bool boosting, float energy, float hp, float score){
+	public void SendMoveInfo(string playerName, float tunnelOffset, bool boosting, float energy, float hp, float score){
+		if (!opponentSceneLoaded)
+			return;
+
 		JSONObject move = new JSONObject ();
 		move.Clear ();
 
@@ -212,6 +253,16 @@ public class ConnectToServer : MonoBehaviour {
 		move.AddField ("score", score);
 
 		m_websocket.Send (move.ToString());
+	}
+
+	public void SendFailUI(bool failOP, float score){
+		if (!opponentSceneLoaded)
+			return;
+
+		JSONObject obj = new JSONObject ();
+		obj.AddField ("header", "fail");
+		obj.AddField ("score", score);
+		m_websocket.Send (obj.ToString());
 	}
 
 	public void testFun(){

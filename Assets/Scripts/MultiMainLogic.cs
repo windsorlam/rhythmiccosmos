@@ -140,9 +140,9 @@ public class MultiMainLogic : MonoBehaviour {
 
 	float score_fore;
 	float score_latter;
-	bool opStop = false;
 
 	RPCLogicHandler _rpcHandler;
+	//ConnectToServer _connectToServer;
 
 	public int index = 0;
 	public int indexFollow = 0;
@@ -169,15 +169,19 @@ public class MultiMainLogic : MonoBehaviour {
 		airCrafts [Setting.planeIndex].SetActive (true);
 
 		player = GameObject.FindGameObjectWithTag("Player_my");    //找到玩家飞船的GameObject
-		playerName = playerNameUI.text;
+		playerName = UIEvents.playerName;
+		playerNameUI.text = playerName;
 		
 		player_op = GameObject.FindGameObjectWithTag ("Player_op");  //find opponent's aircraft
 		player_op.gameObject.SetActive (false);
 
 		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
+		//_connectToServer = FindObjectOfType<ConnectToServer> ();
 
 		if (UIEvents.LANorWAN == 1) {
 			_rpcHandler.SetSceneLoaded (this);
+		} else if (UIEvents.LANorWAN == 2) {
+			//_connectToServer.SetSceneLoaded (this);
 		}
 		
 		score = 0;
@@ -186,6 +190,7 @@ public class MultiMainLogic : MonoBehaviour {
 		DataManager dm=DataManager.Instance;
 		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
+
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -254,17 +259,18 @@ public class MultiMainLogic : MonoBehaviour {
 		
 		CheckFever ();
 
-
-		if (Network.peerType == NetworkPeerType.Client || Network.peerType == NetworkPeerType.Server) {
-			Debug.Log("Network connected.!!!!! going to send message");
-			_rpcHandler.SendMoveCommunication(playerName, tunnelOffset, boosting, energy, hp, score);
-//			networkView.RPC ("ProccessMoveCommunication", RPCMode.Others, playerName, tunnelOffset, boosting, energy, hp, score);
-		} 
-
-		if (Network.peerType == NetworkPeerType.Disconnected || Network.connections.Length <= 0 ) {
-			//_rpcHandler.SendNetworkFailUI();
-			NetworkFailUI.SetActive(true);
+		if (UIEvents.LANorWAN == 1) {
+			if (Network.peerType == NetworkPeerType.Client || Network.peerType == NetworkPeerType.Server) {
+				Debug.Log("Network connected.!!!!! going to send message");
+				_rpcHandler.SendMoveCommunication(playerName, tunnelOffset, boosting, energy, hp, score);
+			}
+			
+			if (Network.peerType == NetworkPeerType.Disconnected || Network.connections.Length <= 0 ) {
+				//_rpcHandler.SendNetworkFailUI();
+				NetworkFailUI.SetActive(true);
+			}
 		}
+
 
 		if (UIEvents.LANorWAN == 2) {
 			//ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
@@ -390,9 +396,13 @@ public class MultiMainLogic : MonoBehaviour {
 			ParseObject testObject = new ParseObject("Score");
 			testObject["score"] = score;
 			testObject.SaveAsync();
-			
-			//networkView.RPC ("ProccessFailUI", RPCMode.Others, true, score);
-			_rpcHandler.SendProccessFailUI(true, score);
+	
+			if(UIEvents.LANorWAN == 1){
+				_rpcHandler.SendProccessFailUI(true, score);
+			}else if(UIEvents.LANorWAN == 2){
+				_connectToServer.SendFailUI(true, score);
+			}
+
 			player.SetActive(false);
 			player_op.SetActive(false);
 			return;

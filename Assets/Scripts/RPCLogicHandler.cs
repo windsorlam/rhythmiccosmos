@@ -143,7 +143,7 @@ public class RPCLogicHandler : MonoBehaviour
 		waitingLabel.SetActive (false);
 
 		DataManager dm = DataManager.Instance;
-		dm.musicPath = music;
+		dm.musicPath = _music;
 		slider.SetActive (true);
 	}
 

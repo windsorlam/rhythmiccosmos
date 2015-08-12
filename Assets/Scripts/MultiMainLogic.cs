@@ -169,7 +169,8 @@ public class MultiMainLogic : MonoBehaviour {
 		airCrafts [Setting.planeIndex].SetActive (true);
 
 		player = GameObject.FindGameObjectWithTag("Player_my");    //找到玩家飞船的GameObject
-		playerName = playerNameUI.text;
+		playerName = UIEvents.playerName;
+		playerNameUI.text = playerName;
 		
 		player_op = GameObject.FindGameObjectWithTag ("Player_op");  //find opponent's aircraft
 		player_op.gameObject.SetActive (false);
@@ -189,6 +190,7 @@ public class MultiMainLogic : MonoBehaviour {
 		DataManager dm=DataManager.Instance;
 		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
+
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //

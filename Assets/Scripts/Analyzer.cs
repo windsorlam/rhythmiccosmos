@@ -25,6 +25,8 @@ public class Analyzer
 		2093,2217,2349,2489,2637,2794,2960,3136,3322,3520,3729,3951,4186};
 	public double beatInterval;
 	public double melodyInterval;
+	public double onsetInterval;
+	public double fullBeatInterval;
 	
 	public Analyzer ()
 	{
@@ -36,12 +38,16 @@ public class Analyzer
 		dm.progress = 0f;
 		switch (dm.difficulty) {
 		case DataManager.EASY:
+			fullBeatInterval=1;
 			beatInterval=5;
 			melodyInterval=1;
+			onsetInterval=3;
 			break;
 		case DataManager.HARD:
+			fullBeatInterval=0;
 			beatInterval=2.2;
 			melodyInterval=0.2;
+			onsetInterval=0;
 			break;
 		}
 		string dir= Environment.CurrentDirectory;
@@ -127,12 +133,15 @@ public class Analyzer
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						fullBeatList.Add((float)(time-fulllasttime));
-						fulllasttime=time;
-						if(interval<2.2)
-							continue;
-						beatList.Add((float)(interval));
-						lasttime=time;
+						double fullInterval=time-fulllasttime;
+						if(fullInterval>=fullBeatInterval){
+							fullBeatList.Add((float)(fullInterval));
+							fulllasttime=time;
+						}
+						if(interval>=beatInterval){
+							beatList.Add((float)(interval));
+							lasttime=time;
+						}
 					}
 					Console.WriteLine(i+" "+lasttime+" "+time);
 					controlsPerSec+=beatList.Count/time;
@@ -143,8 +152,10 @@ public class Analyzer
 					for(i=0;i<tokens.Length;i++){
 						time=double.Parse(tokens[i]);
 						double interval=time-lasttime;
-						onsetList.Add((float)interval);
-						lasttime=time;
+						if(interval>=onsetInterval){
+							onsetList.Add((float)interval);
+							lasttime=time;
+						}
 					}
 					controlsPerSec+=onsetList.Count/time;
 					Console.WriteLine(i+" "+lasttime+" "+time);

@@ -17,6 +17,7 @@ public class DataManager
 	public ArrayList onsetList = null;
 	public ArrayList melodyList = null;
 	public string musicPath = null;
+	public string dataPath = null;
 	public bool isMultiPlayerMode=false;
 
 	public const byte HARD=1;

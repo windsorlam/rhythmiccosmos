@@ -1,0 +1,16 @@
+Version 1.1:
+- Updated FrozenUI_OnOffSwitch inspector script.
+- Updated UIImageCheckbox inspector script.
+- Updated UIImageThumb inspector script.
+- Updated UIInputFocus inspector script.
+- UIWindow hotfixes.
+- Fixed small issue with the FixWidgetDepth script.
+- Added contidion option on UITable_ItemMargin.
+- Improved Icon Slots, alot of small issues.
+- Improved Tooltip, now properly gets top-most depth.
+- Improved Window Pagination, now uses a transform instead of array.
+- Added UIWindow class.
+- Improved window background.
+- Added window drag handle.
+- Split the UI on couple of scenes.
+- Fixed UISelectField background sizing.

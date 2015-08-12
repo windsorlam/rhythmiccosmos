@@ -17,6 +17,7 @@ public class RPCLogicHandler : MonoBehaviour
 
 	private MultiMainLogic _mainLogic;
 
+	GameObject waitingLabel;
 	GameObject playButton;
 	GameObject selectButton;
 	GameObject musiclist;
@@ -24,7 +25,7 @@ public class RPCLogicHandler : MonoBehaviour
 	private string music;
 	DataManager dm;
 	private bool musicSelected;
-	public bool analysisFinished;
+	public static bool analysisFinished;
 
 	void Awake()
 	{
@@ -32,8 +33,9 @@ public class RPCLogicHandler : MonoBehaviour
 		selectButton = GameObject.Find ("MultiSelectMusic");
 		musiclist = GameObject.Find ("MusicList");
 		slider=GameObject.Find("Slider");
+		waitingLabel = GameObject.Find ("WaitingMusic");
 		DontDestroyOnLoad (this);
-		
+
 		dm = DataManager.Instance;
 	}
 
@@ -63,9 +65,12 @@ public class RPCLogicHandler : MonoBehaviour
 		networkView.RPC ("OnGameSceneLoaded", RPCMode.Others, null);
 	}
 
+	//click select music button
 	public void OnSelectMusicClick(){
-		musiclist.SetActive (true);
+		myConnection.musicSet = true;
+		selectButton.SetActive (false);
 
+		musiclist.SetActive (true);
 	}
 
 	public void SendMusicPath(string musicPath){
@@ -74,7 +79,6 @@ public class RPCLogicHandler : MonoBehaviour
 
 	public void sendMusicReady(){
 		//OnMusicReady
-		myConnection.musicSet = true;
 		_musicSet = true;
 
 		networkView.RPC ("OnMusicReady", RPCMode.Others);
@@ -136,6 +140,7 @@ public class RPCLogicHandler : MonoBehaviour
 	void OnMusicSelected(string _music)
 	{
 		musicSelected = true;
+		waitingLabel.SetActive (false);
 
 		DataManager dm = DataManager.Instance;
 		dm.musicPath = music;

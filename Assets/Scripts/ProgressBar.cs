@@ -10,8 +10,7 @@ public class ProgressBar : MonoBehaviour {
 	
 	private AnalyzerHandler aDelegate;
 	private IAsyncResult ar;
-
-	RPCLogicHandler _rpcHandler;
+	
 	// Use this for initialization
 	void Start () {
 		GameObject fb=GameObject.FindWithTag ("Browser");
@@ -26,18 +25,13 @@ public class ProgressBar : MonoBehaviour {
 		progressBar.value=dm.progress;
 		if (analysisFinished) {
 			//aDelegate.EndInvoke(ar);
-			Debug.Log("-------2");
 			if( dm.isMultiPlayerMode ){
-				Debug.Log("------1");
 				if(UIEvents.LANorWAN == 1){
-					_rpcHandler.analysisFinished = true;
+					RPCLogicHandler.analysisFinished = true;
 				}else if(UIEvents.LANorWAN == 2){
-					Debug.Log("0000000");
-					Debug.Log("00110");
 					ConnectToServer.analysisFinished = true;
 				}
 			}else{
-				Debug.Log("888888");
 				Application.LoadLevel("Space");
 			}
 

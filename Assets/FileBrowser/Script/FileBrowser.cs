@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.IO;
+using System;
 #if thread
 using System.Threading;
 #endif
@@ -52,7 +53,12 @@ public class FileBrowser{
 	protected bool isMultiPlayerMode=false;
 	
 	//Constructors
-	public FileBrowser(string directory,int layoutStyle,Rect guiRect){	currentDirectory = new DirectoryInfo(directory);	layout = layoutStyle;	guiSize = guiRect;	}
+	public FileBrowser(string directory,int layoutStyle,Rect guiRect){	
+		currentDirectory = new DirectoryInfo(directory);	
+		DataManager dm = DataManager.Instance;
+		dm.dataPath = directory;
+		layout = layoutStyle;	
+		guiSize = guiRect;	}
 	#if (UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY || UNITY_WP8)
 		public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
 	public FileBrowser(string directory,bool isMultiPlayerMode):this(directory,1){
@@ -65,8 +71,13 @@ public class FileBrowser{
 		public FileBrowser(string directory):this(directory,0){}
 	#endif
 	public FileBrowser(Rect guiRect):this(){	guiSize = guiRect;	}
-	public FileBrowser(int layoutStyle):this(Directory.GetCurrentDirectory(),layoutStyle){}
-	public FileBrowser(bool isMultiPlayerMode):this(Directory.GetCurrentDirectory(),isMultiPlayerMode){}
+#if (UNITY_IPHONE)
+	public FileBrowser(int layoutStyle):this(Application.dataPath+"/Raw",layoutStyle){}
+	public FileBrowser(bool isMultiPlayerMode):this(Application.dataPath+"/Raw",isMultiPlayerMode){}
+#elif (UNITY_ANDROID)
+	public FileBrowser(int layoutStyle):this("jar:file://" + Application.dataPath + "!/assets/",layoutStyle){}
+	public FileBrowser(bool isMultiPlayerMode):this("jar:file://" + Application.dataPath + "!/assets/",isMultiPlayerMode){}
+#endif
 	public FileBrowser():this(Directory.GetCurrentDirectory(),false){}
 	
 	//set variables

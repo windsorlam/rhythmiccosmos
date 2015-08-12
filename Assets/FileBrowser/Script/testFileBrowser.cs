@@ -20,7 +20,6 @@ public class testFileBrowser : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		fb=new FileBrowser(dm.isMultiPlayerMode);
-		
 		//setup file browser style
 		fb.guiSkin = skin; //set the starting skin
 		//set the various textures

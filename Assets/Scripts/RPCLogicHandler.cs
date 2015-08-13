@@ -24,7 +24,7 @@ public class RPCLogicHandler : MonoBehaviour
 	GameObject slider;
 	private string music;
 	DataManager dm;
-	private bool musicSelected;
+	public static bool musicSelected;
 	public static bool analysisFinished;
 
 	void Awake()
@@ -35,7 +35,7 @@ public class RPCLogicHandler : MonoBehaviour
 		slider=GameObject.Find("Slider");
 		waitingLabel = GameObject.Find ("WaitingMusic");
 		DontDestroyOnLoad (this);
-
+		musiclist.SetActive (false);
 		dm = DataManager.Instance;
 	}
 

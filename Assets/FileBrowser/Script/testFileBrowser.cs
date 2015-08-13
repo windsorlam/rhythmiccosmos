@@ -64,12 +64,8 @@ public class testFileBrowser : MonoBehaviour {
 			}else{
 				slider.SetActive (true);
 				string path=fb.outputFile.ToString();
-				if(dm.isMultiPlayerMode){
-					FileInfo file=fb.outputFile;
-					dm.musicPath=file.Name;
-				}else{
-					dm.musicPath=path;
-				}
+				FileInfo file=fb.outputFile;
+				dm.musicPath=file.Name;
 			}
 		}
 

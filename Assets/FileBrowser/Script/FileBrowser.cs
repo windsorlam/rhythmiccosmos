@@ -72,8 +72,8 @@ public class FileBrowser{
 	#endif
 	public FileBrowser(Rect guiRect):this(){	guiSize = guiRect;	}
 #if (UNITY_IPHONE)
-	public FileBrowser(int layoutStyle):this(Application.dataPath+"/StreamingAssets",layoutStyle){}
-	public FileBrowser(bool isMultiPlayerMode):this(Application.dataPath+"/StreamingAssets",isMultiPlayerMode){}
+	public FileBrowser(int layoutStyle):this(Application.dataPath+"/Raw",layoutStyle){}
+	public FileBrowser(bool isMultiPlayerMode):this(Application.dataPath+"/Raw",isMultiPlayerMode){}
 #elif (UNITY_ANDROID)
 	public FileBrowser(int layoutStyle):this("jar:file://" + Application.dataPath + "!/assets/",layoutStyle){}
 	public FileBrowser(bool isMultiPlayerMode):this("jar:file://" + Application.dataPath + "!/assets/",isMultiPlayerMode){}

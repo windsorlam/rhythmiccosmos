@@ -19,7 +19,7 @@ public class ProgressBar : MonoBehaviour {
 	void Start () {
 		GameObject fb=GameObject.FindWithTag ("Browser");
 		fb.SetActive (false);
-		HttpWebRequest request = (HttpWebRequest)WebRequest.Create ("http://i.cs.hku.hk/~wclin/ip.txt");
+		/*HttpWebRequest request = (HttpWebRequest)WebRequest.Create ("http://i.cs.hku.hk/~wclin/ip.txt");
 		request.Method="GET";
 		HttpWebResponse response = (HttpWebResponse)request.GetResponse ();
 		Stream fs = response.GetResponseStream ();
@@ -28,9 +28,10 @@ public class ProgressBar : MonoBehaviour {
 		while (b==46||b>47&&b<58) {
 			ip+=(char)b;
 			b=(byte)fs.ReadByte();
-		}
-		aDelegate=Analyze;
-		ar=aDelegate.BeginInvoke(null,null);
+		}*/
+		//aDelegate=Analyze;
+		//ar=aDelegate.BeginInvoke(null,null);
+		Analyze ();
 	}
 	
 	// Update is called once per frame
@@ -38,7 +39,7 @@ public class ProgressBar : MonoBehaviour {
 		DataManager dm=DataManager.Instance;
 		progressBar.value=dm.progress;
 		if (analysisFinished) {
-			//aDelegate.EndInvoke(ar);
+
 			if( dm.isMultiPlayerMode ){
 				if(UIEvents.LANorWAN == 1){
 					RPCLogicHandler.analysisFinished = true;
@@ -55,28 +56,29 @@ public class ProgressBar : MonoBehaviour {
 	void Analyze(){
 
 		DataManager dm = DataManager.Instance;
-		//if(!dm.isMultiPlayerMode)
-		//	StartCoroutine(UploadAndDownload ());
-		ip = "localhost";
+		if(!dm.isMultiPlayerMode)
+			StartCoroutine(UploadAndDownload ());
+		/*ip = "localhost";
 		string url = "http://" + ip + ":8080/analyze";
-		Debug.Log (url);
-		Analyzer analyzer=new Analyzer();
-		analyzer.Do(dm.musicPath,url);
-
+		Debug.Log (url);*/
+		//Analyzer analyzer = Analyzer.Instance;
+		//analyzer.Do(dm.musicPath,url);
+		//aDelegate.EndInvoke(ar);
+		//analysisFinished = true;
 	}
 
 	IEnumerator UploadAndDownload()
 	{
 		DataManager dm = DataManager.Instance;
 		dm.progress = 0f;
-		string path = dm.dataPath+dm.musicPath;
-		yield return StartCoroutine(UploadFile("https://s.staging.mossapi.com:8080/receive", path, new Dictionary<string, string>()));
+		yield return StartCoroutine(UploadFile("https://s.staging.mossapi.com:8080/receive", dm.musicPath, new Dictionary<string, string>()));
 		
-		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out1.yaml", dm.dataPath+"rhythm.yaml"));
-		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out2.yaml", dm.dataPath+"melody.yaml"));
-		Analyzer analyzer = new Analyzer ();
+		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out1.yaml", dm.dataPath+"/rhythm.yaml"));
+		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out2.yaml", dm.dataPath+"/melody.yaml"));
+		Analyzer analyzer = Analyzer.Instance;
 		analyzer.Do (dm.musicPath);
 		analysisFinished = true;
+		//aDelegate.EndInvoke(ar);
 	}
 	
 	IEnumerator UploadFile(string url, string filePath, Dictionary<string, string> postJson)

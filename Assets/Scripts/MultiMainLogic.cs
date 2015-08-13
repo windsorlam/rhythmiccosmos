@@ -403,7 +403,7 @@ public class MultiMainLogic : MonoBehaviour {
 			if(UIEvents.LANorWAN == 1){
 				_rpcHandler.SendProccessFailUI(true, score);
 			}else if(UIEvents.LANorWAN == 2){
-				_connectToServer.SendFailUI(true, score);
+//				_connectToServer.SendFailUI(true, score);
 			}
 
 			player.SetActive(false);

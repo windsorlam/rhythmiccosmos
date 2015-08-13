@@ -192,6 +192,24 @@ public class MultiMainLogic : MonoBehaviour {
 		hp = hpUI.value;
 
 		DataManager dm=DataManager.Instance;
+		/*
+		highlightIntervalList.Add(3.4);
+		highlightIntervalList.Add(3.5);
+		highlightIntervalList.Add(3.2);
+		highlightIntervalList.Add(3.6);
+		highlightIntervalList.Add(3.2);
+		highlightIntervalList.Add(3.8);
+		highlightIntervalList.Add(4.4);
+		highlightIntervalList.Add(2.4);
+
+		dirIntervalList.Add (5.4);
+		dirIntervalList.Add (6.4);
+	dirIntervalList.Add (4.4);
+		dirIntervalList.Add (5.8);
+		dirIntervalList.Add (5.2);
+		dirIntervalList.Add (6.4);
+		dirIntervalList.Add (5.4);
+		*/
 		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
 	}
@@ -237,7 +255,7 @@ public class MultiMainLogic : MonoBehaviour {
 		if (UIEvents.LANorWAN == 1) {
 			if(!_rpcHandler.isGameReadyToPlay()) return;
 		} else if (UIEvents.LANorWAN == 2) {
-			//if (!ConnectToServer.isGameReady ()) return;
+			if (!_connectToServer.isGameReady ()) return;
 		}
 
 		CheckHp ();    //get current HP value
@@ -277,6 +295,7 @@ public class MultiMainLogic : MonoBehaviour {
 
 		if (UIEvents.LANorWAN == 2) {
 			if(!_connectToServer.isNetworkFail()){
+				Debug.Log("send info");
 				_connectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
 			}else{
 				NetworkFailUI.SetActive(true);
@@ -403,7 +422,7 @@ public class MultiMainLogic : MonoBehaviour {
 			if(UIEvents.LANorWAN == 1){
 				_rpcHandler.SendProccessFailUI(true, score);
 			}else if(UIEvents.LANorWAN == 2){
-//				_connectToServer.SendFailUI(true, score);
+				_connectToServer.SendFailUI(true, score);
 			}
 
 			player.SetActive(false);

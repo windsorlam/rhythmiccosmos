@@ -20,6 +20,20 @@ public class Spwaner :  MonoBehaviour
 	// Use this for initialization
 	void Start () {
 		DataManager dm=DataManager.Instance;
+		/*
+		haloIntervalList.Add (1.8);
+		haloIntervalList.Add (2.8);
+		haloIntervalList.Add (1.9);
+		haloIntervalList.Add (2.1);
+		haloIntervalList.Add (1.9);
+		haloIntervalList.Add (3.1);
+		haloIntervalList.Add (3.8);
+		haloIntervalList.Add (2.8);
+		haloIntervalList.Add (1.9);
+		haloIntervalList.Add (2.8);
+		haloIntervalList.Add (1.8);
+		haloIntervalList.Add (1.2);*/
+
 		haloIntervalList = dm.onsetList;
 	}
 	

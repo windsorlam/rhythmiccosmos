@@ -127,7 +127,9 @@ public class myConnection : MonoBehaviour {
 			//GUIStatus = "start";
 			found = false;
 		}
-		waitingLabel.SetActive (true);
+		if (!RPCLogicHandler.musicSelected) {
+			waitingLabel.SetActive (true);
+		}
 	}
 
 	void OnServer(){

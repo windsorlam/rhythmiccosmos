@@ -10,8 +10,8 @@ public class myConnection : MonoBehaviour {
 	////---- Publish/Browsing Service part variable *********************
 	public int ListenPort = 10000;
 	public string publishServiceName = "myService"; //name of published service
-	public string publishServiceType = "_myService._tcp"; //type of published service
-	public string browseServiceType = "_myService._tcp"; //type of browsing
+	public string publishServiceType = "_myService._udp"; //type of published service
+	public string browseServiceType = "_myService._udp"; //type of browsing
 	private string foundServiceName = "";//services have been found
 	
 	////---- All status variable ****************************************

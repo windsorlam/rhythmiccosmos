@@ -51,7 +51,7 @@ public class Analyzer
 			break;
 		}
 		if (isPreset (musicPath)) {
-			stream=new FileStream(dm.dataPath+"/"+dm.musicPath+" - rhythm.yaml",FileMode.Open, FileAccess.Read);
+			stream=new FileStream(dm.absPath+" - rhythm.yaml",FileMode.Open, FileAccess.Read);
 		}else{
 			Encoding encoding = DEFAULTENCODE;
 			string boundary = "---------------------------" + DateTime.Now.Ticks.ToString ("x");
@@ -144,16 +144,17 @@ public class Analyzer
 	private bool isPreset(string musicPath)
 	{
 		DataManager dm=DataManager.Instance;
-		FileStream file = new FileStream (dm.dataPath +"/"+ musicPath,FileMode.Open,FileAccess.Read);
-		if (file.CanRead)
-			return true;
-		file = new FileStream (musicPath, FileMode.Open, FileAccess.Read);
-		if (file.CanRead)
-			return true;
-		return false;
+		FileStream file;
+		try{
+			file = new FileStream (Application.streamingAssetsPath +"/"+ musicPath,FileMode.Open,FileAccess.Read);
+
+		}catch(Exception e){
+			return false;
+		}
+		return file.CanRead;
 	}
-	
-	public void Do(string musicPath)
+
+	public void Do()
 	{
 		DataManager dm=DataManager.Instance;
 		//dm.progress = 0f;
@@ -173,9 +174,9 @@ public class Analyzer
 		}
 		string melodyPath = Application.persistentDataPath+"/melody.yaml";
 		string rhythmPath = Application.persistentDataPath+"/rhythm.yaml";
-		if (dm.isMultiPlayerMode||isPreset(musicPath)) {
-			melodyPath=dm.dataPath+"/"+dm.musicPath+" - melody.yaml";
-			rhythmPath=dm.dataPath+"/"+dm.musicPath+" - rhythm.yaml";
+		if (isPreset(dm.musicPath)) {
+			melodyPath=dm.absPath+" - melody.yaml";
+			rhythmPath=dm.absPath+" - rhythm.yaml";
 		} else {
 			/*Console.WriteLine(dm.dataPath+"/Algorithm/streaming_predominantmelody");
 			Console.WriteLine(dm.dataPath+"/Algorithm/streaming_extractor");
@@ -197,24 +198,42 @@ public class Analyzer
 		for (; dm.progress<60; dm.progress+=0.01f)
 			;
 		double controlsPerSec = 0.0;
-		Console.WriteLine ("Start parsing melody");
-		try{
+		Console.WriteLine ("Start parsing melody: "+melodyPath);
+		//try{
 			/**
 			 * Parsing melody.yaml
 			 */
-			FileStream fs1 = new FileStream (melodyPath, FileMode.Open);
-			StreamReader sr1 = new StreamReader (fs1);
-			FileStream fs2=new FileStream(rhythmPath,FileMode.Open);
-			StreamReader sr2=new StreamReader(fs2);
-			long fileSize=fs1.Length+fs2.Length;
-			string line;
+			WWW file1=new WWW("file://"+melodyPath);
+			//yield return file1;
+		while (!file1.isDone) {
+		}
+			string melodytext=file1.text;
+			string[] melodylines=melodytext.Split(new char[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries);
+			//FileStream fs1 = new FileStream (melodyPath, FileMode.Open);
+			//StreamReader sr1 = new StreamReader (fs1);
+			//FileStream fs2=new FileStream(rhythmPath,FileMode.Open);
+			//StreamReader sr2=new StreamReader(fs2);
+			WWW file2=new WWW("file://"+rhythmPath);
+		while (!file2.isDone) {
+		}
+		//yield return file2;
+			string rhythmtext=file2.text;
+			string[] rhythmlines=rhythmtext.Split(new char[]{'\n'},StringSplitOptions.RemoveEmptyEntries);
+			int fileSize=melodytext.Length+rhythmtext.Length;
+			//string line;
 			ArrayList melodyList = new ArrayList();
 			//Console.WriteLine(list[0]);
 			int i;
-			while ((line=sr1.ReadLine())!=null) {
+		bool found = false;
+			foreach(string line in melodylines){
+			//while ((line=sr1.ReadLine())!=null) {
 				//Console.WriteLine("line");
 				dm.progress+=(float)line.Length*80f/(float)fileSize;
 				if (line.Contains ("pitch")) {
+				/*found=true;
+				continue;
+			}
+			if(found){*/
 					//Console.WriteLine("pitch");
 					string[] tokens = line.Trim ("pitch: []".ToCharArray ()).Split (',');
 					double frequency = 0.0;
@@ -240,15 +259,16 @@ public class Analyzer
 					break;
 				}
 			}
-			sr1.Close ();
-			Console.WriteLine ("Start parsing rhythm");
+			//sr1.Close ();
+			Console.WriteLine ("Start parsing rhythm "+rhythmPath);
 			/**
 			 * Parsing rhythm.yaml
 			 */
 			ArrayList beatList=new ArrayList();
 			ArrayList onsetList=new ArrayList();
 			ArrayList fullBeatList=new ArrayList();
-			while ((line=sr2.ReadLine())!=null){
+			foreach(string line in rhythmlines){
+			//while ((line=sr2.ReadLine())!=null){
 				dm.progress+=(float)line.Length*80f/(float)fileSize;
 				if(line.Contains("beats_position")){
 					string[] tokens=line.Trim("beats_position: []".ToCharArray()).Split(',');
@@ -261,10 +281,12 @@ public class Analyzer
 						double fullInterval=time-fulllasttime;
 						if(fullInterval>=fullBeatInterval){
 							fullBeatList.Add((float)(fullInterval));
+							Console.WriteLine("fullbeat add"+fullInterval);
 							fulllasttime=time;
 						}
 						if(interval>=beatInterval){
 							beatList.Add((float)(interval));
+							Console.WriteLine("beat add"+interval);
 							lasttime=time;
 						}
 					}
@@ -287,12 +309,13 @@ public class Analyzer
 					break;
 				}
 			}
-			sr2.Close();
+			//sr2.Close();
 			dm.beatList=beatList;
 			dm.onsetList=onsetList;
 			dm.melodyList=melodyList;
 			dm.fullBeatList=fullBeatList;
 			dm.difficultyRatio=controlsPerSec;
+		//yield return 0;
 			if(dm.beatList!=null){
 				Console.WriteLine("beatlist"+dm.beatList.Count.ToString());
 			}
@@ -306,10 +329,10 @@ public class Analyzer
 				Console.WriteLine("fullbeatlist"+dm.fullBeatList.Count.ToString());
 			}
 			for (; dm.progress<100; dm.progress+=0.01f);
-		}catch(IOException ex){
+		/*}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());
 			return;
-		}
+		}*/
 	}
 	
 	public double GetFrequency(double f){

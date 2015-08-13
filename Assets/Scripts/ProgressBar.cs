@@ -12,8 +12,8 @@ public class ProgressBar : MonoBehaviour {
 	private string ip="";
 	delegate void AnalyzerHandler();
 	
-	private AnalyzerHandler aDelegate;
-	private IAsyncResult ar;
+	//private AnalyzerHandler aDelegate;
+	//private IAsyncResult ar;
 
 	private DataManager dm;
 	// Use this for initialization
@@ -31,13 +31,17 @@ public class ProgressBar : MonoBehaviour {
 			ip+=(char)b;
 			b=(byte)fs.ReadByte();
 		}*/
-		if (!dm.isMultiPlayerMode) {
-			Debug.Log ("debug log start analysis");
-			Console.WriteLine ("console start analysis");
-			StartCoroutine (UploadAndDownload ());
+		Debug.Log ("multi " + dm.isMultiPlayerMode);
+		Debug.Log ("preset? " + isPreset (dm.musicPath));
+		if (isPreset(dm.musicPath)) {
+			Debug.Log("start analysis");
+			StartCoroutine(Analyze());
+			//aDelegate = Analyze;
+			//ar = aDelegate.BeginInvoke (null, null);
+
 		} else {
-			aDelegate = Analyze;
-			ar = aDelegate.BeginInvoke (null, null);
+			Debug.Log ("start up&down*analysis");
+			StartCoroutine (UploadAndDownload ());
 		}
 	}
 	
@@ -47,6 +51,14 @@ public class ProgressBar : MonoBehaviour {
 		//Debug.Log ("progress"+dm.progress);
 		if (analysisFinished) {
 			Debug.Log("finished!!");
+			foreach(float i in dm.beatList){
+				Debug.Log("b"+i);
+			}
+			foreach(float i in dm.onsetList){
+				Debug.Log("onset"+i);
+			}
+			Debug.Log("abs "+dm.absPath);
+			Debug.Log("name "+dm.musicPath);
 			if( dm.isMultiPlayerMode ){
 				if(UIEvents.LANorWAN == 1){
 					RPCLogicHandler.analysisFinished = true;
@@ -61,12 +73,13 @@ public class ProgressBar : MonoBehaviour {
 		}
 	}
 
-	void Analyze(){
+	IEnumerator Analyze(){
 		Analyzer analyzer = Analyzer.Instance;
-		analyzer.Do (dm.musicPath);
-		aDelegate.EndInvoke (ar);
+		analyzer.Do ();
+		//aDelegate.EndInvoke (ar);
 		analysisFinished = true;
 		Debug.Log("finished");
+		yield return 0;
 		/*ip = "localhost";
 		string url = "http://" + ip + ":8080/analyze";
 		Debug.Log (url);*/
@@ -76,14 +89,14 @@ public class ProgressBar : MonoBehaviour {
 	{
 		Debug.Log ("up and down");
 		dm.progress = 0f;
-		yield return StartCoroutine(UploadFile("http://s.staging.mossapi.com:8080/receive", dm.dataPath+"/"+dm.musicPath, new Dictionary<string, string>()));
+		yield return StartCoroutine(UploadFile("http://s.staging.mossapi.com:8080/receive", dm.absPath, new Dictionary<string, string>()));
 		
 		StartCoroutine(DownloadFile("http://s.staging.mossapi.com:8080/out1.yaml", Application.persistentDataPath+"/rhythm.yaml"));
-		StartCoroutine(DownloadFile("http://s.staging.mossapi.com:8080/out2.yaml", Application.persistentDataPath+"/melody.yaml"));
+		yield return StartCoroutine(DownloadFile("http://s.staging.mossapi.com:8080/out2.yaml", Application.persistentDataPath+"/melody.yaml"));
 		Analyzer analyzer = Analyzer.Instance;
-		analyzer.Do (dm.musicPath);
+		analyzer.Do ();
 		analysisFinished = true;
-		aDelegate.EndInvoke(ar);
+		//aDelegate.EndInvoke(ar);
 	}
 	
 	IEnumerator UploadFile(string url, string filePath, Dictionary<string, string> postJson)
@@ -145,5 +158,16 @@ public class ProgressBar : MonoBehaviour {
 		}
 		dm.progress += 15f;
 	}
-
+	private bool isPreset(string musicPath)
+	{
+		DataManager dm=DataManager.Instance;
+		FileStream file;
+		try{
+			file = new FileStream (Application.streamingAssetsPath +"/"+ musicPath,FileMode.Open,FileAccess.Read);
+			
+		}catch(Exception e){
+			return false;
+		}
+		return file.CanRead;
+	}
 }

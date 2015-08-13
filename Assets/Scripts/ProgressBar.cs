@@ -14,11 +14,13 @@ public class ProgressBar : MonoBehaviour {
 	
 	private AnalyzerHandler aDelegate;
 	private IAsyncResult ar;
-	
+
+	private DataManager dm;
 	// Use this for initialization
 	void Start () {
 		GameObject fb=GameObject.FindWithTag ("Browser");
 		fb.SetActive (false);
+		dm = DataManager.Instance;
 		/*HttpWebRequest request = (HttpWebRequest)WebRequest.Create ("http://i.cs.hku.hk/~wclin/ip.txt");
 		request.Method="GET";
 		HttpWebResponse response = (HttpWebResponse)request.GetResponse ();
@@ -29,17 +31,22 @@ public class ProgressBar : MonoBehaviour {
 			ip+=(char)b;
 			b=(byte)fs.ReadByte();
 		}*/
-		//aDelegate=Analyze;
-		//ar=aDelegate.BeginInvoke(null,null);
-		Analyze ();
+		if (!dm.isMultiPlayerMode) {
+			Debug.Log ("debug log start analysis");
+			Console.WriteLine ("console start analysis");
+			StartCoroutine (UploadAndDownload ());
+		} else {
+			aDelegate = Analyze;
+			ar = aDelegate.BeginInvoke (null, null);
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		DataManager dm=DataManager.Instance;
 		progressBar.value=dm.progress;
+		//Debug.Log ("progress"+dm.progress);
 		if (analysisFinished) {
-
+			Debug.Log("finished!!");
 			if( dm.isMultiPlayerMode ){
 				if(UIEvents.LANorWAN == 1){
 					RPCLogicHandler.analysisFinished = true;
@@ -47,6 +54,7 @@ public class ProgressBar : MonoBehaviour {
 					//ConnectToServer.analysisFinished = true;
 				}
 			}else{
+				Debug.Log("finished!! single mode");
 				Application.LoadLevel("Space");
 			}
 
@@ -54,35 +62,33 @@ public class ProgressBar : MonoBehaviour {
 	}
 
 	void Analyze(){
-
-		DataManager dm = DataManager.Instance;
-		if(!dm.isMultiPlayerMode)
-			StartCoroutine(UploadAndDownload ());
+		Analyzer analyzer = Analyzer.Instance;
+		analyzer.Do (dm.musicPath);
+		aDelegate.EndInvoke (ar);
+		analysisFinished = true;
+		Debug.Log("finished");
 		/*ip = "localhost";
 		string url = "http://" + ip + ":8080/analyze";
 		Debug.Log (url);*/
-		//Analyzer analyzer = Analyzer.Instance;
-		//analyzer.Do(dm.musicPath,url);
-		//aDelegate.EndInvoke(ar);
-		//analysisFinished = true;
 	}
 
 	IEnumerator UploadAndDownload()
 	{
-		DataManager dm = DataManager.Instance;
+		Debug.Log ("up and down");
 		dm.progress = 0f;
-		yield return StartCoroutine(UploadFile("https://s.staging.mossapi.com:8080/receive", dm.musicPath, new Dictionary<string, string>()));
+		yield return StartCoroutine(UploadFile("http://s.staging.mossapi.com:8080/receive", dm.dataPath+"/"+dm.musicPath, new Dictionary<string, string>()));
 		
-		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out1.yaml", dm.dataPath+"/rhythm.yaml"));
-		StartCoroutine(DownloadFile("https://s.staging.mossapi.com:8080/out2.yaml", dm.dataPath+"/melody.yaml"));
+		StartCoroutine(DownloadFile("http://s.staging.mossapi.com:8080/out1.yaml", Application.persistentDataPath+"/rhythm.yaml"));
+		StartCoroutine(DownloadFile("http://s.staging.mossapi.com:8080/out2.yaml", Application.persistentDataPath+"/melody.yaml"));
 		Analyzer analyzer = Analyzer.Instance;
 		analyzer.Do (dm.musicPath);
 		analysisFinished = true;
-		//aDelegate.EndInvoke(ar);
+		aDelegate.EndInvoke(ar);
 	}
 	
 	IEnumerator UploadFile(string url, string filePath, Dictionary<string, string> postJson)
 	{
+		Debug.Log ("upload");
 		WWWForm form = new WWWForm();
 		
 		foreach(var post in postJson)
@@ -111,15 +117,15 @@ public class ProgressBar : MonoBehaviour {
 			}
 			else
 			{
-				Debug.Log("Upload Failed");
+				Debug.Log("Upload Failed: "+www.error);
 			}
 		}
-		DataManager dm = DataManager.Instance;
 		dm.progress += 25f;
 	}
 	
 	IEnumerator DownloadFile(string url, string filePath)
 	{
+		Debug.Log ("download");
 		using(var www = new WWW(url))
 		{
 			yield return www;
@@ -134,10 +140,9 @@ public class ProgressBar : MonoBehaviour {
 			}
 			else
 			{
-				Debug.Log("Download Failed");
+				Debug.Log("Download Failed: "+www.error);
 			}
 		}
-		DataManager dm = DataManager.Instance;
 		dm.progress += 15f;
 	}
 

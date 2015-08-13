@@ -144,8 +144,13 @@ public class Analyzer
 	private bool isPreset(string musicPath)
 	{
 		DataManager dm=DataManager.Instance;
-		FileStream file = new FileStream (dm.dataPath + musicPath,FileMode.Open,FileAccess.Read);
-		return file.CanRead;
+		FileStream file = new FileStream (dm.dataPath +"/"+ musicPath,FileMode.Open,FileAccess.Read);
+		if (file.CanRead)
+			return true;
+		file = new FileStream (musicPath, FileMode.Open, FileAccess.Read);
+		if (file.CanRead)
+			return true;
+		return false;
 	}
 	
 	public void Do(string musicPath)
@@ -166,11 +171,11 @@ public class Analyzer
 			onsetInterval=0;
 			break;
 		}
-		string melodyPath = dm.dataPath+"/melody.yaml";
-		string rhythmPath = dm.dataPath+"/rhythm.yaml";
-		if (dm.isMultiPlayerMode) {
-			melodyPath=dm.musicPath+" - melody.yaml";
-			rhythmPath=dm.musicPath+" - rhythm.yaml";
+		string melodyPath = Application.persistentDataPath+"/melody.yaml";
+		string rhythmPath = Application.persistentDataPath+"/rhythm.yaml";
+		if (dm.isMultiPlayerMode||isPreset(musicPath)) {
+			melodyPath=dm.dataPath+"/"+dm.musicPath+" - melody.yaml";
+			rhythmPath=dm.dataPath+"/"+dm.musicPath+" - rhythm.yaml";
 		} else {
 			/*Console.WriteLine(dm.dataPath+"/Algorithm/streaming_predominantmelody");
 			Console.WriteLine(dm.dataPath+"/Algorithm/streaming_extractor");
@@ -192,6 +197,7 @@ public class Analyzer
 		for (; dm.progress<60; dm.progress+=0.01f)
 			;
 		double controlsPerSec = 0.0;
+		Console.WriteLine ("Start parsing melody");
 		try{
 			/**
 			 * Parsing melody.yaml
@@ -235,6 +241,7 @@ public class Analyzer
 				}
 			}
 			sr1.Close ();
+			Console.WriteLine ("Start parsing rhythm");
 			/**
 			 * Parsing rhythm.yaml
 			 */
@@ -286,7 +293,18 @@ public class Analyzer
 			dm.melodyList=melodyList;
 			dm.fullBeatList=fullBeatList;
 			dm.difficultyRatio=controlsPerSec;
-			Console.WriteLine(dm.difficulty);
+			if(dm.beatList!=null){
+				Console.WriteLine("beatlist"+dm.beatList.Count.ToString());
+			}
+			if(dm.onsetList!=null){
+				Console.WriteLine("onsetlist"+dm.onsetList.Count.ToString());
+			}
+			if(dm.melodyList!=null){
+				Console.WriteLine("melodylist"+dm.melodyList.Count.ToString());
+			}
+			if(dm.fullBeatList!=null){
+				Console.WriteLine("fullbeatlist"+dm.fullBeatList.Count.ToString());
+			}
 			for (; dm.progress<100; dm.progress+=0.01f);
 		}catch(IOException ex){
 			Console.WriteLine (ex.ToString ());

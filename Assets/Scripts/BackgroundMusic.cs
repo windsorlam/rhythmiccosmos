@@ -8,8 +8,9 @@ public class BackgroundMusic : MonoBehaviour {
 	void Start(){
 		AudioSource music = GetComponent<AudioSource> ();
 		DataManager dm = DataManager.Instance;
-		string musicPath = dm.musicPath;
-		WWW www = new WWW ("file://"+musicPath);
+		string path = "file://"+dm.dataPath+"/"+dm.musicPath;
+		Debug.Log (path);
+		WWW www = new WWW (path);
 		music.clip = www.audioClip;
 		music.Play();
 	}

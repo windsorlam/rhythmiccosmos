@@ -146,7 +146,7 @@ public class MultiMainLogic : MonoBehaviour {
 	float score_latter;
 
 	RPCLogicHandler _rpcHandler;
-	ConnectToServer _connectToServer;
+	//ConnectToServer _connectToServer;
 
 	public int index = 0;
 	public int indexFollow = 0;
@@ -180,12 +180,12 @@ public class MultiMainLogic : MonoBehaviour {
 		player_op.gameObject.SetActive (false);
 
 		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
-		_connectToServer = FindObjectOfType<ConnectToServer> ();
+		//_connectToServer = FindObjectOfType<ConnectToServer> ();
 
 		if (UIEvents.LANorWAN == 1) {
 			_rpcHandler.SetSceneLoaded (this);
 		} else if (UIEvents.LANorWAN == 2) {
-			_connectToServer.SetSceneLoaded (this);
+			//_connectToServer.SetSceneLoaded (this);
 		}
 		
 		score = 0;
@@ -276,11 +276,11 @@ public class MultiMainLogic : MonoBehaviour {
 
 
 		if (UIEvents.LANorWAN == 2) {
-			if(!_connectToServer.isNetworkFail()){
+			/*if(!_connectToServer.isNetworkFail()){
 				_connectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
 			}else{
 				NetworkFailUI.SetActive(true);
-			}
+			}*/
 		}
 	} 
 

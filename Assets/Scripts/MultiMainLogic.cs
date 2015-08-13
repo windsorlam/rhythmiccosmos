@@ -54,6 +54,10 @@ public class MultiMainLogic : MonoBehaviour {
 	public float highlightInterval = 4; //Change highlight tracks
 	
 	public ArrayList highlightIntervalList = new ArrayList(); 
+	public ArrayList dirIntervalList = new ArrayList(); 
+	//public ArrayList highlightIntervalList = new ArrayList (100);
+
+
 	int highlightIntervalIndex = 0;
 	
 	public float currentSpeed = 80;     //当前隧道移动速度
@@ -142,11 +146,11 @@ public class MultiMainLogic : MonoBehaviour {
 	float score_latter;
 
 	RPCLogicHandler _rpcHandler;
-	//ConnectToServer _connectToServer;
+	ConnectToServer _connectToServer;
 
 	public int index = 0;
 	public int indexFollow = 0;
-	public ArrayList dirIntervalList = new ArrayList(); 
+
 	int dirIntervalIndex = 0;
 
 
@@ -176,12 +180,12 @@ public class MultiMainLogic : MonoBehaviour {
 		player_op.gameObject.SetActive (false);
 
 		_rpcHandler = FindObjectOfType<RPCLogicHandler> ();
-		//_connectToServer = FindObjectOfType<ConnectToServer> ();
+		_connectToServer = FindObjectOfType<ConnectToServer> ();
 
 		if (UIEvents.LANorWAN == 1) {
 			_rpcHandler.SetSceneLoaded (this);
 		} else if (UIEvents.LANorWAN == 2) {
-			//_connectToServer.SetSceneLoaded (this);
+			_connectToServer.SetSceneLoaded (this);
 		}
 		
 		score = 0;
@@ -190,7 +194,6 @@ public class MultiMainLogic : MonoBehaviour {
 		DataManager dm=DataManager.Instance;
 		highlightIntervalList=  dm.fullBeatList;
 		dirIntervalList = dm.beatList; 
-
 	}
 	
 	public void ProccessMoveCommunication(string _playerName, float _tunnelOffset, bool _boosting, float _energy, float _hp, float _score){ //
@@ -273,12 +276,12 @@ public class MultiMainLogic : MonoBehaviour {
 
 
 		if (UIEvents.LANorWAN == 2) {
-			//ConnectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
+			if(!_connectToServer.isNetworkFail()){
+				_connectToServer.SendMoveInfo(playerName, tunnelOffset, boosting, energy, hp, score);
+			}else{
+				NetworkFailUI.SetActive(true);
+			}
 		}
-
-		/*if (ConnectToServer.isNetworkFail()) {
-			NetworkFailUI.SetActive(true);
-		}*/
 	} 
 
 	public void ProccessNetworkFailUI(){

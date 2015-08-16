@@ -19,7 +19,7 @@ public class DataManager
 	public string musicPath = null;
 	public string absPath=null;
 	public bool isMultiPlayerMode=false;
-
+	
 	public const byte HARD=1;
 	public const byte EASY=0;
 	
@@ -33,9 +33,9 @@ public class DataManager
 			return instance;
 		}
 	}
-
+	
 	public float progress=0.0f;
 	public double difficultyRatio=0.0;
 	public byte difficulty=0;
-
+	
 }

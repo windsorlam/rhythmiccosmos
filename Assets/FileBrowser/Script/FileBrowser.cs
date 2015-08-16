@@ -9,7 +9,7 @@ using System.Threading;
 
 
 public class FileBrowser{
-//public 
+	//public 
 	//Optional Parameters
 	public string name = "File Browser"; //Just a name to identify the file browser with
 	//GUI Options
@@ -26,7 +26,7 @@ public class FileBrowser{
 	//Search
 	public bool showSearch = false; //show the search bar
 	public bool searchRecursively = false; //search current folder and sub folders
-//Protected	
+	//Protected	
 	//GUI
 	protected Vector2 fileScroll=Vector2.zero,folderScroll=Vector2.zero,driveScroll=Vector2.zero;
 	protected Color defaultColor;
@@ -49,36 +49,32 @@ public class FileBrowser{
 	#if thread
 	protected Thread t;
 	#endif
-
+	
 	protected bool isMultiPlayerMode=false;
 	
 	//Constructors
-	public FileBrowser(string directory,int layoutStyle,Rect guiRect){	
-		currentDirectory = new DirectoryInfo(directory);	
-		DataManager dm = DataManager.Instance;
-		dm.dataPath = directory;
-		layout = layoutStyle;	
+	public FileBrowser(string directory,int layoutStyle,Rect guiRect){
+		if(directory.Contains("://")){
+			currentDirectory=new DirectoryInfo(Directory.GetCurrentDirectory());
+		}else{
+			currentDirectory = new DirectoryInfo(directory);
+		}
+		layout = layoutStyle;
 		guiSize = guiRect;	}
 	#if (UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY || UNITY_WP8)
-		public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
-	public FileBrowser(string directory,bool isMultiPlayerMode):this(directory,1){
+	public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
+	public FileBrowser(bool isMultiPlayerMode):this(Application.streamingAssetsPath,1){
 		this.isMultiPlayerMode = isMultiPlayerMode;
 		if (!isMultiPlayerMode)
 			showDrives = false;
 	}
 	#else
-		public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(Screen.width*0.125f,Screen.height*0.125f,Screen.width*0.75f,Screen.height*0.75f)){}
-		public FileBrowser(string directory):this(directory,0){}
+	public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(Screen.width*0.125f,Screen.height*0.125f,Screen.width*0.75f,Screen.height*0.75f)){}
+	public FileBrowser(string directory):this(directory,0){}
 	#endif
 	public FileBrowser(Rect guiRect):this(){	guiSize = guiRect;	}
-#if (UNITY_IPHONE)
-	public FileBrowser(int layoutStyle):this(Application.dataPath+"/Raw",layoutStyle){}
-	public FileBrowser(bool isMultiPlayerMode):this(Application.dataPath+"/Raw",isMultiPlayerMode){}
-#elif (UNITY_ANDROID)
-	public FileBrowser(int layoutStyle):this("jar:file://" + Application.dataPath + "!/assets/",layoutStyle){}
-	public FileBrowser(bool isMultiPlayerMode):this("jar:file://" + Application.dataPath + "!/assets/",isMultiPlayerMode){}
-#endif
-	public FileBrowser():this(Directory.GetCurrentDirectory(),false){}
+	
+	public FileBrowser():this(false){}
 	
 	//set variables
 	public void setDirectory(string dir){	currentDirectory=new DirectoryInfo(dir);	}
@@ -99,118 +95,118 @@ public class FileBrowser{
 		GUILayout.BeginArea(guiSize);
 		GUILayout.BeginVertical("box");
 		switch(layout){
-			case 0:
-				GUILayout.BeginHorizontal("box");
-					GUILayout.FlexibleSpace();
-					GUILayout.Label(currentDirectory.FullName);
-					GUILayout.FlexibleSpace();
-					if(showSearch){
-						drawSearchField();
-						GUILayout.Space(10);
-					}
-				GUILayout.EndHorizontal();
-				GUILayout.BeginHorizontal("box");
-					GUILayout.BeginVertical(GUILayout.MaxWidth(300));
-						folderScroll = GUILayout.BeginScrollView(folderScroll);
-						if(showDrives){
-							foreach(DirectoryInformation di in drives){
-								if(di.button()){	getFileList(di.di);	}
-							}
-						}else if(!isMultiPlayerMode){
-							if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
-								getFileList(parentDir.di);
-						}
-						if(!isMultiPlayerMode){
-							foreach(DirectoryInformation di in directories){
-								if(di.button()){	getFileList(di.di);	}
-							}
-						}
-						GUILayout.EndScrollView();
-					GUILayout.EndVertical();
-					GUILayout.BeginVertical("box");
-						if(isSearching){
-							drawSearchMessage();
-						}else{
-							fileScroll = GUILayout.BeginScrollView(fileScroll);
-							for(int fi=0;fi<files.Length;fi++){
-								if(selectedFile==fi){
-									defaultColor = GUI.color;
-									GUI.color = selectedColor;
-								}
-								if(files[fi].button()){
-									outputFile = files[fi].fi;
-									selectedFile = fi;
-								}
-								if(selectedFile==fi)
-									GUI.color = defaultColor;
-							}
-							GUILayout.EndScrollView();
-						}
-						GUILayout.BeginHorizontal();
-						if((cancelStyle == null)?GUILayout.Button("Cancel"):GUILayout.Button("Cancel",cancelStyle)){
-							outputFile = null;
-							return true;
-						}
-						//GUILayout.FlexibleSpace();
-						if((selectStyle == null)?GUILayout.Button("Select"):GUILayout.Button("Select",selectStyle)){
-							return true;
-						}
-						//GUILayout.FlexibleSpace();
-						GUILayout.EndHorizontal();
-					GUILayout.EndVertical();
-				GUILayout.EndHorizontal();
-				break;
-			case 1: //mobile preferred layout
-			default:
-				if(showSearch){
-					GUILayout.BeginHorizontal("box");
-						GUILayout.FlexibleSpace();
-						drawSearchField();
-						GUILayout.FlexibleSpace();
-					GUILayout.EndHorizontal();
+		case 0:
+			GUILayout.BeginHorizontal("box");
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(currentDirectory.FullName);
+			GUILayout.FlexibleSpace();
+			if(showSearch){
+				drawSearchField();
+				GUILayout.Space(10);
+			}
+			GUILayout.EndHorizontal();
+			GUILayout.BeginHorizontal("box");
+			GUILayout.BeginVertical(GUILayout.MaxWidth(300));
+			folderScroll = GUILayout.BeginScrollView(folderScroll);
+			if(showDrives){
+				foreach(DirectoryInformation di in drives){
+					if(di.button()){	getFileList(di.di);	}
 				}
+			}else if(!isMultiPlayerMode){
+				if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
+					getFileList(parentDir.di);
+			}
+			if(!isMultiPlayerMode){
+				foreach(DirectoryInformation di in directories){
+					if(di.button()){	getFileList(di.di);	}
+				}
+			}
+			GUILayout.EndScrollView();
+			GUILayout.EndVertical();
+			GUILayout.BeginVertical("box");
+			if(isSearching){
+				drawSearchMessage();
+			}else{
 				fileScroll = GUILayout.BeginScrollView(fileScroll);
-				
-				if(isSearching){
-					drawSearchMessage();
-				}else{
-					if(showDrives){
-						GUILayout.BeginHorizontal();
-						foreach(DirectoryInformation di in drives){
-							if(di.button()){	getFileList(di.di);	}
-						}
-						GUILayout.EndHorizontal();
-					}else if(!isMultiPlayerMode){
-						if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
-							getFileList(parentDir.di);
+				for(int fi=0;fi<files.Length;fi++){
+					if(selectedFile==fi){
+						defaultColor = GUI.color;
+						GUI.color = selectedColor;
 					}
-					
-					if(!isMultiPlayerMode){
-						foreach(DirectoryInformation di in directories){
-							if(di.button()){	getFileList(di.di);	}
-						}
+					if(files[fi].button()){
+						outputFile = files[fi].fi;
+						selectedFile = fi;
 					}
-					for(int fi=0;fi<files.Length;fi++){
-						if(selectedFile==fi){
-							defaultColor = GUI.color;
-							GUI.color = selectedColor;
-						}
-						if(files[fi].button()){
-							outputFile = files[fi].fi;
-							selectedFile = fi;
-						}
-						if(selectedFile==fi)
-							GUI.color = defaultColor;
-					}
+					if(selectedFile==fi)
+						GUI.color = defaultColor;
 				}
 				GUILayout.EndScrollView();
-				
-				if((selectStyle == null)?GUILayout.Button("Select"):GUILayout.Button("Select",selectStyle)){	return true;	}
-				if((cancelStyle == null)?GUILayout.Button("Cancel"):GUILayout.Button("Cancel",cancelStyle)){
-					outputFile = null;
-					return true;
+			}
+			GUILayout.BeginHorizontal();
+			if((cancelStyle == null)?GUILayout.Button("Cancel"):GUILayout.Button("Cancel",cancelStyle)){
+				outputFile = null;
+				return true;
+			}
+			//GUILayout.FlexibleSpace();
+			if((selectStyle == null)?GUILayout.Button("Select"):GUILayout.Button("Select",selectStyle)){
+				return true;
+			}
+			//GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
+			GUILayout.EndHorizontal();
+			break;
+		case 1: //mobile preferred layout
+		default:
+			if(showSearch){
+				GUILayout.BeginHorizontal("box");
+				GUILayout.FlexibleSpace();
+				drawSearchField();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+			}
+			fileScroll = GUILayout.BeginScrollView(fileScroll);
+			
+			if(isSearching){
+				drawSearchMessage();
+			}else{
+				if(showDrives){
+					GUILayout.BeginHorizontal();
+					foreach(DirectoryInformation di in drives){
+						if(di.button()){	getFileList(di.di);	}
+					}
+					GUILayout.EndHorizontal();
+				}else if(!isMultiPlayerMode){
+					if((backStyle != null)?parentDir.button(backStyle):parentDir.button())
+						getFileList(parentDir.di);
 				}
-				break;
+				
+				if(!isMultiPlayerMode){
+					foreach(DirectoryInformation di in directories){
+						if(di.button()){	getFileList(di.di);	}
+					}
+				}
+				for(int fi=0;fi<files.Length;fi++){
+					if(selectedFile==fi){
+						defaultColor = GUI.color;
+						GUI.color = selectedColor;
+					}
+					if(files[fi].button()){
+						outputFile = files[fi].fi;
+						selectedFile = fi;
+					}
+					if(selectedFile==fi)
+						GUI.color = defaultColor;
+				}
+			}
+			GUILayout.EndScrollView();
+			
+			if((selectStyle == null)?GUILayout.Button("Select"):GUILayout.Button("Select",selectStyle)){	return true;	}
+			if((cancelStyle == null)?GUILayout.Button("Cancel"):GUILayout.Button("Cancel",cancelStyle)){
+				outputFile = null;
+				return true;
+			}
+			break;
 		}
 		GUILayout.EndVertical();
 		GUILayout.EndArea();
@@ -310,7 +306,7 @@ public class FileBrowser{
 			}
 		}
 	}
-
+	
 	private bool isMusicFile(FileInfo file){
 		string[] suffixes = {"wav","mp3","ogg","flac","aiff"};
 		string name = file.Name;

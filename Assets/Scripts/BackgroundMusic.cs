@@ -2,9 +2,9 @@
 using System.Collections;
 
 public class BackgroundMusic : MonoBehaviour {
-
-
-
+	
+	
+	
 	void Start(){
 		AudioSource music = GetComponent<AudioSource> ();
 		DataManager dm = DataManager.Instance;
@@ -14,11 +14,11 @@ public class BackgroundMusic : MonoBehaviour {
 		music.clip = www.audioClip;
 		music.Play();
 	}
-
+	
 	void Update () {
-//		AudioSource music = GetComponent<AudioSource> ();
-//		if (!music.isPlaying  ) {
-//			music.Play();
-//		}
+		//		AudioSource music = GetComponent<AudioSource> ();
+		//		if (!music.isPlaying  ) {
+		//			music.Play();
+		//		}
 	}
 }

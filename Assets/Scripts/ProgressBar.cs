@@ -14,13 +14,32 @@ public class ProgressBar : MonoBehaviour {
 	
 	//private AnalyzerHandler aDelegate;
 	//private IAsyncResult ar;
-
+	public bool client;
 	private DataManager dm;
 	// Use this for initialization
 	void Start () {
-		GameObject fb=GameObject.FindWithTag ("Browser");
-		fb.SetActive (false);
+
+		if (UIEvents.LANorWAN == 1) {
+			//if (RPCLogicHandler.role.Equals ("client")) {
+				//client = true;
+			//} else {
+				//client = false;
+			//}
+		} else if (UIEvents.LANorWAN == 2) {
+			if (ConnectToServer.role.Equals ("client")) {
+				client = true;
+			} else {
+				client = false;
+			}
+		}
 		dm = DataManager.Instance;
+		Debug.Log(dm.isMultiPlayerMode + "and" + client);
+
+		if (!(dm.isMultiPlayerMode&&client)) {
+			Debug.Log(dm.isMultiPlayerMode + "and" + client);
+			GameObject fb = GameObject.FindWithTag ("Browser");
+			fb.SetActive (false);
+		}
 		/*HttpWebRequest request = (HttpWebRequest)WebRequest.Create ("http://i.cs.hku.hk/~wclin/ip.txt");
 		request.Method="GET";
 		HttpWebResponse response = (HttpWebResponse)request.GetResponse ();
@@ -33,12 +52,15 @@ public class ProgressBar : MonoBehaviour {
 		}*/
 		Debug.Log ("multi " + dm.isMultiPlayerMode);
 		Debug.Log ("preset? " + isPreset (dm.musicPath));
+		if (dm.isMultiPlayerMode) {
+			dm.absPath=Application.streamingAssetsPath+"/"+dm.musicPath;
+		}
 		if (isPreset(dm.musicPath)) {
 			Debug.Log("start analysis");
 			StartCoroutine(Analyze());
 			//aDelegate = Analyze;
 			//ar = aDelegate.BeginInvoke (null, null);
-
+			
 		} else {
 			Debug.Log ("start up&down*analysis");
 			StartCoroutine (UploadAndDownload ());
@@ -61,7 +83,7 @@ public class ProgressBar : MonoBehaviour {
 			Debug.Log("name "+dm.musicPath);
 			if( dm.isMultiPlayerMode ){
 				if(UIEvents.LANorWAN == 1){
-					RPCLogicHandler.analysisFinished = true;
+					//RPCLogicHandler.analysisFinished = true;
 				}else if(UIEvents.LANorWAN == 2){
 					//ConnectToServer.analysisFinished = true;
 				}
@@ -69,10 +91,10 @@ public class ProgressBar : MonoBehaviour {
 				Debug.Log("finished!! single mode");
 				Application.LoadLevel("Space");
 			}
-
+			
 		}
 	}
-
+	
 	IEnumerator Analyze(){
 		Analyzer analyzer = Analyzer.Instance;
 		analyzer.Do ();
@@ -84,7 +106,7 @@ public class ProgressBar : MonoBehaviour {
 		string url = "http://" + ip + ":8080/analyze";
 		Debug.Log (url);*/
 	}
-
+	
 	IEnumerator UploadAndDownload()
 	{
 		Debug.Log ("up and down");

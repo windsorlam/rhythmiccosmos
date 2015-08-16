@@ -9,13 +9,13 @@ public class testFileBrowser : MonoBehaviour {
 	public Texture2D file,folder,back,drive;
 	//public GUIStyle cancelStyle,selectStyle;
 	public GameObject slider;
-
 	
-//	string[] layoutTypes = {"Type 0","Type 1"};
+	
+	//	string[] layoutTypes = {"Type 0","Type 1"};
 	//initialize file browser
-
+	
 	DataManager dm=DataManager.Instance;
-
+	
 	FileBrowser fb ;
 	// Use this for initialization
 	void Start () {
@@ -66,13 +66,18 @@ public class testFileBrowser : MonoBehaviour {
 				string path=fb.outputFile.ToString();
 				FileInfo file=fb.outputFile;
 				dm.musicPath=file.Name;
+				#if(UNITY_ANDROID)
+				dm.absPath="/sdcard/storage/"+path;
+#else
+				dm.absPath=path;
+				#endif
 			}
 		}
-
+		
 	}
-
-
-
-
-
+	
+	
+	
+	
+	
 }

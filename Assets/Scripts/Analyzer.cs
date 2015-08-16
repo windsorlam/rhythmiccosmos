@@ -71,7 +71,7 @@ public class Analyzer
 				byte[] headerbytes = encoding.GetBytes (header);                   
 				requestStream.Write (headerbytes, 0, headerbytes.Length);
 				dm.progress=5f;
-				using (FileStream fileStream = new FileStream(musicPath, FileMode.Open, FileAccess.Read)) {                        
+				using (FileStream fileStream = new FileStream(musicPath, FileMode.Open, FileAccess.Read)) {
 					while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0) {
 						requestStream.Write (buffer, 0, bytesRead);
 						dm.progress+=0.005f;
@@ -146,7 +146,7 @@ public class Analyzer
 		DataManager dm=DataManager.Instance;
 		FileStream file;
 		try{
-			file = new FileStream (Application.streamingAssetsPath +"/"+ musicPath,FileMode.Open,FileAccess.Read);
+			file = new FileStream (dm.absPath+" - melody.yaml",FileMode.Open,FileAccess.Read);
 			
 		}catch(Exception e){
 			return false;
@@ -175,13 +175,8 @@ public class Analyzer
 		string melodyPath = Application.persistentDataPath+"/melody.yaml";
 		string rhythmPath = Application.persistentDataPath+"/rhythm.yaml";
 		if (isPreset(dm.musicPath)) {
-#if(UNITY_IPHONE)
-			melodyPath=Application.dataPath+"/Raw/"+dm.musicPath+" - melody.yaml";
-			rhythmPath=Application.dataPath+"/Raw/"+dm.musicPath+" - rhythm.yaml";
-#else
 			melodyPath=dm.absPath+" - melody.yaml";
 			rhythmPath=dm.absPath+" - rhythm.yaml";
-#endif
 		} else {
 			/*Console.WriteLine(dm.dataPath+"/Algorithm/streaming_predominantmelody");
 			Console.WriteLine(dm.dataPath+"/Algorithm/streaming_extractor");
@@ -208,6 +203,14 @@ public class Analyzer
 		/**
 			 * Parsing melody.yaml
 			 */
+
+#if(UNITY_IPHONE)
+		FileStream fs1 = new FileStream (melodyPath, FileMode.Open,FileAccess.Read);
+		StreamReader sr1 = new StreamReader (fs1);
+		FileStream fs2=new FileStream(rhythmPath,FileMode.Open,FileAccess.Read);
+		StreamReader sr2=new StreamReader(fs2);
+		long fileSize=fs1.Length+fs2.Length;
+		#else
 		WWW file1=new WWW("file://"+melodyPath);
 		//yield return file1;
 		while (!file1.isDone) {
@@ -215,13 +218,6 @@ public class Analyzer
 		string melodytext=file1.text;
 		Console.WriteLine (melodytext);
 		string[] melodylines=melodytext.Split(new char[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries);
-#if(UNITY_IPHONE)
-		FileStream fs1 = new FileStream (melodyPath, FileMode.Open,FileAccess.Read);
-		StreamReader sr1 = new StreamReader (fs1);
-		FileStream fs2=new FileStream(rhythmPath,FileMode.Open,FileAccess.Read);
-		StreamReader sr2=new StreamReader(fs2);
-		long fileSize=fs1.Length+fs2.Length;
-#else
 		WWW file2=new WWW("file://"+rhythmPath);
 		while (!file2.isDone) {
 		}

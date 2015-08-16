@@ -54,20 +54,28 @@ public class FileBrowser{
 	
 	//Constructors
 	public FileBrowser(string directory,int layoutStyle,Rect guiRect){
+#if(UNITY_IPHONE)
+		currentDirectory=new DirectoryInfo(Application.dataPath+"/StreamingAssets/");//Run on Unity Editor with Build Settings of iPhone
+#elif(UNITY_ANDROID)
+		currentDirectory=new DirectoryInfo("/sdcard/storage/");
+#else
 		if(directory.Contains("://")){
 			currentDirectory=new DirectoryInfo(Directory.GetCurrentDirectory());
 		}else{
 			currentDirectory = new DirectoryInfo(directory);
 		}
+#endif
+
 		layout = layoutStyle;
 		guiSize = guiRect;	}
-	#if (UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY || UNITY_WP8)
-	public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
 	public FileBrowser(bool isMultiPlayerMode):this(Application.streamingAssetsPath,1){
 		this.isMultiPlayerMode = isMultiPlayerMode;
 		if (!isMultiPlayerMode)
 			showDrives = false;
 	}
+	#if (UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY || UNITY_WP8)
+	public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(0,0,Screen.width,Screen.height)){}
+
 	#else
 	public FileBrowser(string directory,int layoutStyle):this(directory,layoutStyle,new Rect(Screen.width*0.125f,Screen.height*0.125f,Screen.width*0.75f,Screen.height*0.75f)){}
 	public FileBrowser(string directory):this(directory,0){}
